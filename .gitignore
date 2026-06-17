@@ -1,0 +1,21 @@
+# APK output (build locally)
+releases/
+
+# Environment
+.env
+.env.local
+
+# IDE / OS
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Flutter (digivla_mobile)
+digivla_mobile/.dart_tool/
+digivla_mobile/.pub/
+digivla_mobile/build/
+digivla_mobile/android/build/
+digivla_mobile/.flutter-plugins
+digivla_mobile/.flutter-plugins-dependencies
+digivla_mobile/**/GeneratedPluginRegistrant.*
