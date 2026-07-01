@@ -19,7 +19,6 @@ flutter pub get
 | Environment | URL |
 |-------------|-----|
 | LAN (VM) | `http://192.168.100.50:8005` |
-| Outside LAN | `https://input-digivla.ngrok.app` |
 
 ```bash
 # LAN — physical device on same WiFi as VM
@@ -35,10 +34,6 @@ flutter run --dart-define=API_BASE_URL=http://10.0.2.2:8005
 # LAN
 $env:API_BASE_URL = "http://192.168.100.50:8005"
 .\build-apk.ps1
-
-# Outside LAN (ngrok on VM)
-.\build-apk.ps1
-# default API: https://input-digivla.ngrok.app
 ```
 
 Output: `releases/digivla-mobile.apk`
@@ -65,4 +60,3 @@ Output: `releases/digivla-mobile.apk`
 
 1. Use **Test koneksi server** on the login screen.
 2. Physical device must be on **same WiFi** as VM for LAN builds (`192.168.100.x`).
-3. Outside LAN → rebuild APK with ngrok URL.

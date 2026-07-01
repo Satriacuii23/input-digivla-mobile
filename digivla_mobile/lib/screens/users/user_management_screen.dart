@@ -23,6 +23,8 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
   List<RoleOption> _roles = [];
   bool _loading = true;
   String? _error;
+  String? _filterRole;
+  String? _filterStatus;
 
   @override
   void initState() {
@@ -65,6 +67,8 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
     try {
       final users = await _service.listUsers(
         search: _searchCtrl.text.trim().isEmpty ? null : _searchCtrl.text.trim(),
+        role: _filterRole,
+        status: _filterStatus,
       );
       if (!mounted) return;
       setState(() {
@@ -86,6 +90,7 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
     final passwordCtrl = TextEditingController();
     final fullNameCtrl = TextEditingController(text: user?.fullName ?? '');
     final emailCtrl = TextEditingController(text: user?.email ?? '');
+    final productionCtrl = TextEditingController(text: user?.production ?? 'production');
     var role = user?.role ?? 'staff_online';
     var status = user?.status ?? 'active';
 
@@ -134,6 +139,11 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
                         controller: emailCtrl,
                         decoration: const InputDecoration(labelText: 'Email'),
                         keyboardType: TextInputType.emailAddress,
+                      ),
+                      const SizedBox(height: 12),
+                      TextField(
+                        controller: productionCtrl,
+                        decoration: const InputDecoration(labelText: 'Production'),
                       ),
                       const SizedBox(height: 12),
                       DropdownButtonFormField<String>(
@@ -196,6 +206,7 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
           'email': emailCtrl.text.trim(),
           'role': role,
           'status': status,
+          'production': productionCtrl.text.trim(),
         });
       } else {
         final payload = <String, dynamic>{
@@ -203,6 +214,7 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
           'email': emailCtrl.text.trim(),
           'role': role,
           'status': status,
+          'production': productionCtrl.text.trim(),
         };
         if (passwordCtrl.text.isNotEmpty) payload['password'] = passwordCtrl.text;
         await _service.updateUser(user.id, payload);
@@ -234,21 +246,69 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
         children: [
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-            child: Row(
+            child: Column(
               children: [
-                Expanded(
-                  child: TextField(
-                    controller: _searchCtrl,
-                    decoration: const InputDecoration(
-                      hintText: 'Cari user…',
-                      prefixIcon: Icon(Icons.search),
-                      isDense: true,
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        controller: _searchCtrl,
+                        decoration: const InputDecoration(
+                          hintText: 'Search users…',
+                          prefixIcon: Icon(Icons.search),
+                          isDense: true,
+                        ),
+                        onSubmitted: (_) => _search(),
+                      ),
                     ),
-                    onSubmitted: (_) => _search(),
+                    const SizedBox(width: 8),
+                    IconButton(onPressed: _bootstrap, icon: const Icon(Icons.refresh_outlined)),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: [
+                      FilterChip(
+                        label: const Text('All roles', style: TextStyle(fontSize: 12)),
+                        selected: _filterRole == null,
+                        onSelected: (_) { setState(() => _filterRole = null); _search(); },
+                      ),
+                      const SizedBox(width: 8),
+                      ..._roles.map((r) => Padding(
+                            padding: const EdgeInsets.only(right: 8),
+                            child: FilterChip(
+                              label: Text(r.label, style: const TextStyle(fontSize: 12)),
+                              selected: _filterRole == r.value,
+                              onSelected: (_) { setState(() => _filterRole = r.value); _search(); },
+                            ),
+                          )),
+                    ],
                   ),
                 ),
-                const SizedBox(width: 8),
-                IconButton(onPressed: _bootstrap, icon: const Icon(Icons.refresh_outlined)),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    FilterChip(
+                      label: const Text('All status', style: TextStyle(fontSize: 12)),
+                      selected: _filterStatus == null,
+                      onSelected: (_) { setState(() => _filterStatus = null); _search(); },
+                    ),
+                    const SizedBox(width: 8),
+                    FilterChip(
+                      label: const Text('Active', style: TextStyle(fontSize: 12)),
+                      selected: _filterStatus == 'active',
+                      onSelected: (_) { setState(() => _filterStatus = 'active'); _search(); },
+                    ),
+                    const SizedBox(width: 8),
+                    FilterChip(
+                      label: const Text('Inactive', style: TextStyle(fontSize: 12)),
+                      selected: _filterStatus == 'inactive',
+                      onSelected: (_) { setState(() => _filterStatus = 'inactive'); _search(); },
+                    ),
+                  ],
+                ),
               ],
             ),
           ),

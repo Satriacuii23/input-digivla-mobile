@@ -8,6 +8,8 @@ import '../../models/media.dart';
 import '../../services/media_service.dart';
 import '../../widgets/app_scaffold.dart';
 import '../../widgets/digivla_widgets.dart';
+import 'media_bulk_import_tab.dart';
+import 'media_multi_add_tab.dart';
 
 class AddMediaScreen extends StatefulWidget {
   const AddMediaScreen({super.key});
@@ -112,10 +114,40 @@ class _AddMediaScreenState extends State<AddMediaScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return PageScaffold(
-      title: 'Add Media',
-      subtitle: 'Single entry',
-      body: _loadingTypes
+    return DefaultTabController(
+      length: 3,
+      child: PageScaffold(
+        title: 'Add Media',
+        subtitle: 'Single · Multi · Bulk',
+        body: Column(
+          children: [
+            const TabBar(
+              labelColor: AppColors.navy,
+              unselectedLabelColor: AppColors.textMuted,
+              indicatorColor: AppColors.navy,
+              tabs: [
+                Tab(text: 'Single'),
+                Tab(text: 'Multi'),
+                Tab(text: 'Bulk'),
+              ],
+            ),
+            Expanded(
+              child: TabBarView(
+                children: [
+                  _buildSingleForm(),
+                  const MediaMultiAddTab(),
+                  const MediaBulkImportTab(),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSingleForm() {
+    return _loadingTypes
           ? const LoadingView(message: 'Menyiapkan formulir', subtitle: 'Memuat data…')
           : ListView(
               padding: const EdgeInsets.all(16),
@@ -242,7 +274,6 @@ class _AddMediaScreenState extends State<AddMediaScreen> {
                   ),
                 ),
               ],
-            ),
-    );
+            );
   }
 }

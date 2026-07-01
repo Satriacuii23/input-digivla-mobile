@@ -16,6 +16,8 @@ import '../screens/media/media_detail_screen.dart';
 import '../screens/media/media_list_screen.dart';
 import '../screens/qc/article_qc_screen.dart';
 import '../screens/tools/tools_screen.dart';
+import '../screens/tools/media_reach_screen.dart';
+import '../screens/tools/backtrack_screen.dart';
 import '../screens/upload/multi_upload_screen.dart';
 import '../screens/upload/upload_screen.dart';
 import '../screens/users/user_management_screen.dart';
@@ -44,6 +46,8 @@ GoRouter createAppRouter(AuthProvider auth) {
       GoRoute(path: '/login', builder: (_, __) => const LoginScreen()),
       GoRoute(path: '/home', builder: (_, __) => const HomeScreen()),
       GoRoute(path: '/tools', builder: (_, __) => const ToolsScreen()),
+      GoRoute(path: '/tools/media-reach', builder: (_, __) => const MediaReachScreen()),
+      GoRoute(path: '/tools/backtrack', builder: (_, __) => const BacktrackScreen()),
       GoRoute(path: '/users', builder: (_, __) => const UserManagementScreen()),
 
       for (final ch in ArticleChannel.values)

@@ -12,6 +12,8 @@ class ArticleService {
     int limit = 15,
     String? search,
     int? mediaId,
+    String? startDate,
+    String? endDate,
     String? createdStartDate,
     String? createdEndDate,
   }) async {
@@ -21,6 +23,8 @@ class ArticleService {
     };
     if (search != null && search.isNotEmpty) query['search'] = search;
     if (mediaId != null) query['media_id'] = '$mediaId';
+    if (startDate != null) query['start_date'] = startDate;
+    if (endDate != null) query['end_date'] = endDate;
     if (createdStartDate != null) query['created_start_date'] = createdStartDate;
     if (createdEndDate != null) query['created_end_date'] = createdEndDate;
 

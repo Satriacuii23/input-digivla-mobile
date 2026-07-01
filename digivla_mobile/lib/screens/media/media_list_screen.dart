@@ -8,6 +8,7 @@ import '../../models/media.dart';
 import '../../services/media_service.dart';
 import '../../widgets/app_scaffold.dart';
 import '../../widgets/digivla_widgets.dart';
+import '../../widgets/list_filters.dart';
 
 class MediaListScreen extends StatefulWidget {
   const MediaListScreen({super.key});
@@ -29,6 +30,7 @@ class _MediaListScreenState extends State<MediaListScreen> {
   bool _loadingMore = false;
   String? _error;
   int? _filterTypeId;
+  String? _filterStatus;
 
   @override
   void initState() {
@@ -65,6 +67,7 @@ class _MediaListScreenState extends State<MediaListScreen> {
         limit: 20,
         mediaTypeId: _filterTypeId,
         search: _searchCtrl.text.trim().isEmpty ? null : _searchCtrl.text.trim(),
+        status: _filterStatus,
       );
       if (!mounted) return;
       setState(() {
@@ -92,6 +95,7 @@ class _MediaListScreenState extends State<MediaListScreen> {
         limit: 20,
         mediaTypeId: _filterTypeId,
         search: _searchCtrl.text.trim().isEmpty ? null : _searchCtrl.text.trim(),
+        status: _filterStatus,
       );
       if (!mounted) return;
       setState(() {
@@ -142,6 +146,14 @@ class _MediaListScreenState extends State<MediaListScreen> {
                         : null,
                   ),
                   onSubmitted: (_) => _load(refresh: true),
+                ),
+                const SizedBox(height: 10),
+                StatusFilterRow(
+                  selected: _filterStatus,
+                  onChanged: (v) {
+                    setState(() => _filterStatus = v);
+                    _load(refresh: true);
+                  },
                 ),
                 const SizedBox(height: 10),
                 SingleChildScrollView(

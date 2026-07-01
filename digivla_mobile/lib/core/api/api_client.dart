@@ -16,7 +16,7 @@ class ApiClient {
   String? _token;
 
   static const _networkError =
-      'Tidak dapat terhubung ke server. Pastikan HP terhubung WiFi yang sama dengan VM (192.168.100.x) dan API URL benar di bawah form login.';
+      'Tidak dapat terhubung ke server. Pastikan server aktif dan periksa koneksi jaringan Anda.';
 
   void setToken(String? token) => _token = token;
   String? get token => _token;
@@ -109,7 +109,7 @@ class ApiClient {
       return await request().timeout(timeout);
     } on TimeoutException {
       throw const ApiException(
-        'Koneksi ke server timeout. Periksa jaringan WiFi atau gunakan APK build ngrok jika di luar LAN.',
+        'Koneksi ke server timeout. Periksa jaringan WiFi atau koneksi internet Anda.',
       );
     } on SocketException {
       throw const ApiException(_networkError);
@@ -117,7 +117,7 @@ class ApiClient {
       throw const ApiException(_networkError);
     } on HandshakeException {
       throw const ApiException(
-        'Gagal handshake SSL. Jika di luar LAN, build APK dengan URL ngrok HTTPS.',
+        'Gagal handshake SSL. Periksa sertifikat SSL server Anda.',
       );
     }
   }

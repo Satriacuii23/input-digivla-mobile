@@ -5,11 +5,14 @@ import 'package:provider/provider.dart';
 import '../../config/theme.dart';
 import '../../core/auth/auth_provider.dart';
 import '../../models/article.dart';
+import '../../models/media.dart';
 import '../../services/article_service.dart';
+import '../../services/media_service.dart';
 import '../../widgets/app_scaffold.dart';
 import '../../widgets/digivla_widgets.dart';
+import '../../widgets/list_filters.dart';
 
-/// Quality Control — artikel upload hari ini per channel.
+/// Quality Control — uploads by created date, aligned with web QC pages.
 class ArticleQcScreen extends StatefulWidget {
   const ArticleQcScreen({super.key, required this.channel});
 
@@ -21,25 +24,28 @@ class ArticleQcScreen extends StatefulWidget {
 
 class _ArticleQcScreenState extends State<ArticleQcScreen> {
   late final ArticleService _service;
+  late final MediaService _mediaService;
   final _searchCtrl = TextEditingController();
   final _scrollCtrl = ScrollController();
 
   List<ArticleModel> _items = [];
+  List<MediaModel> _mediaOptions = [];
   int _page = 1;
   bool _hasMore = true;
   int _total = 0;
   bool _loading = true;
   bool _loadingMore = false;
   String? _error;
-
-  String get _today =>
-      '${DateTime.now().year}-${DateTime.now().month.toString().padLeft(2, '0')}-${DateTime.now().day.toString().padLeft(2, '0')}';
+  QcPeriod _period = QcPeriod.todayYesterday;
+  int? _mediaFilterId;
 
   @override
   void initState() {
     super.initState();
     _service = ArticleService(context.read<AuthProvider>().api);
+    _mediaService = MediaService(context.read<AuthProvider>().api);
     _scrollCtrl.addListener(_onScroll);
+    _loadMediaOptions();
     _load(refresh: true);
   }
 
@@ -56,6 +62,17 @@ class _ArticleQcScreenState extends State<ArticleQcScreen> {
     }
   }
 
+  Future<void> _loadMediaOptions() async {
+    final typeId = widget.channel.mediaTypeId;
+    if (typeId == null) return;
+    try {
+      final list = await _mediaService.listByType(typeId);
+      if (mounted) setState(() => _mediaOptions = list);
+    } catch (_) {}
+  }
+
+  ({String start, String end}) get _dateRange => QcPeriodFilterRow.dateRange(_period);
+
   Future<void> _load({bool refresh = false}) async {
     if (refresh) {
       setState(() {
@@ -65,11 +82,13 @@ class _ArticleQcScreenState extends State<ArticleQcScreen> {
       });
     }
     try {
+      final range = _dateRange;
       final result = await _service.listArticles(
         channel: widget.channel,
         page: 1,
-        createdStartDate: _today,
-        createdEndDate: _today,
+        createdStartDate: range.start,
+        createdEndDate: range.end,
+        mediaId: _mediaFilterId,
         search: _searchCtrl.text.trim().isEmpty ? null : _searchCtrl.text.trim(),
       );
       if (!mounted) return;
@@ -93,11 +112,13 @@ class _ArticleQcScreenState extends State<ArticleQcScreen> {
     if (_loadingMore || !_hasMore) return;
     setState(() => _loadingMore = true);
     try {
+      final range = _dateRange;
       final result = await _service.listArticles(
         channel: widget.channel,
         page: _page + 1,
-        createdStartDate: _today,
-        createdEndDate: _today,
+        createdStartDate: range.start,
+        createdEndDate: range.end,
+        mediaId: _mediaFilterId,
         search: _searchCtrl.text.trim().isEmpty ? null : _searchCtrl.text.trim(),
       );
       if (!mounted) return;
@@ -114,33 +135,57 @@ class _ArticleQcScreenState extends State<ArticleQcScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final range = _dateRange;
     return PageScaffold(
       title: 'QC ${widget.channel.label}',
-      subtitle: "Today's uploads · $_today · $_total articles",
+      subtitle: '${range.start} → ${range.end} · $_total articles',
       body: Column(
         children: [
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-            child: TextField(
-              controller: _searchCtrl,
-              decoration: const InputDecoration(
-                hintText: 'Cari judul atau konten…',
-                prefixIcon: Icon(Icons.search),
-                isDense: true,
-              ),
-              onSubmitted: (_) => _load(refresh: true),
+            child: Column(
+              children: [
+                QcPeriodFilterRow(
+                  period: _period,
+                  onChanged: (p) {
+                    setState(() => _period = p);
+                    _load(refresh: true);
+                  },
+                ),
+                const SizedBox(height: 10),
+                TextField(
+                  controller: _searchCtrl,
+                  decoration: const InputDecoration(
+                    hintText: 'Search title or content…',
+                    prefixIcon: Icon(Icons.search),
+                    isDense: true,
+                  ),
+                  onSubmitted: (_) => _load(refresh: true),
+                ),
+                if (_mediaOptions.isNotEmpty) ...[
+                  const SizedBox(height: 10),
+                  MediaFilterDropdown(
+                    options: _mediaOptions,
+                    selectedId: _mediaFilterId,
+                    onChanged: (v) {
+                      setState(() => _mediaFilterId = v);
+                      _load(refresh: true);
+                    },
+                  ),
+                ],
+              ],
             ),
           ),
           Expanded(
             child: _loading
-                ? const LoadingView(message: 'Memuat QC', subtitle: 'Artikel upload hari ini…')
+                ? const LoadingView(message: 'Loading QC', subtitle: 'Fetching uploads…')
                 : _error != null
-                    ? EmptyState(icon: Icons.error_outline, title: 'Gagal memuat', subtitle: _error)
+                    ? EmptyState(icon: Icons.error_outline, title: 'Load failed', subtitle: _error)
                     : _items.isEmpty
                         ? EmptyState(
                             icon: Icons.fact_check_outlined,
-                            title: 'Tidak ada artikel',
-                            subtitle: 'Belum ada upload ${widget.channel.label} hari ini.',
+                            title: 'No articles',
+                            subtitle: 'No ${widget.channel.label} uploads in this period.',
                           )
                         : RefreshIndicator(
                             onRefresh: () => _load(refresh: true),
@@ -152,7 +197,7 @@ class _ArticleQcScreenState extends State<ArticleQcScreen> {
                               separatorBuilder: (_, __) => const SizedBox(height: 10),
                               itemBuilder: (context, index) {
                                 if (index >= _items.length) {
-                                  return const LoadingMoreRow(message: 'Memuat…');
+                                  return const LoadingMoreRow(message: 'Loading…');
                                 }
                                 final a = _items[index];
                                 return DigivlaCard(
@@ -167,10 +212,17 @@ class _ArticleQcScreenState extends State<ArticleQcScreen> {
                                         children: [
                                           ChannelBadge(label: 'QC ${widget.channel.label}'),
                                           const Spacer(),
-                                          Text('#${a.articleId}', style: const TextStyle(fontSize: 11, color: AppColors.textMuted)),
+                                          TextButton.icon(
+                                            onPressed: () => context.push(
+                                              '/${widget.channel.apiPath}/edit/${a.articleId}',
+                                              extra: a,
+                                            ),
+                                            icon: const Icon(Icons.edit_outlined, size: 16),
+                                            label: const Text('Edit', style: TextStyle(fontSize: 12)),
+                                          ),
                                         ],
                                       ),
-                                      const SizedBox(height: 10),
+                                      const SizedBox(height: 6),
                                       Text(
                                         a.title,
                                         maxLines: 2,
@@ -183,6 +235,15 @@ class _ArticleQcScreenState extends State<ArticleQcScreen> {
                                         maxLines: 2,
                                         overflow: TextOverflow.ellipsis,
                                         style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                                      ),
+                                      const SizedBox(height: 8),
+                                      Wrap(
+                                        spacing: 6,
+                                        runSpacing: 6,
+                                        children: [
+                                          if (a.mediaName != null) MetaChip(icon: Icons.business_outlined, label: a.mediaName!),
+                                          if (a.datee != null) MetaChip(icon: Icons.calendar_today_outlined, label: a.datee!),
+                                        ],
                                       ),
                                     ],
                                   ),

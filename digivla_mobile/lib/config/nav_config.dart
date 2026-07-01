@@ -18,6 +18,8 @@ class NavConfig {
       const NavEntry(label: 'QC Online', route: '/qc/online', icon: Icons.fact_check_outlined),
       const NavEntry(label: 'User Management', route: '/users', icon: Icons.manage_accounts_outlined),
       const NavEntry(label: 'Tools', route: '/tools', icon: Icons.build_outlined),
+      const NavEntry(label: 'Media Reach', route: '/tools/media-reach', icon: Icons.travel_explore_outlined),
+      const NavEntry(label: 'Backtrack', route: '/tools/backtrack', icon: Icons.history_outlined),
     ];
     return all.where((e) => UserRbac.canAccessRoute(role, e.route)).toList();
   }

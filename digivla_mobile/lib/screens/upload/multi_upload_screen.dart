@@ -291,6 +291,65 @@ class _MultiUploadScreenState extends State<MultiUploadScreen> {
     if (ok > 0) context.go(widget.channel.listRoute);
   }
 
+  void _showBatchApply() {
+    MediaModel? batchMedia = _mediaOptions.isNotEmpty ? _mediaOptions.first : null;
+    DateTime batchDate = DateTime.now();
+    final journalistCtrl = TextEditingController();
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: AppColors.white,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(16))),
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setLocal) => Padding(
+          padding: EdgeInsets.fromLTRB(20, 16, 20, 20 + MediaQuery.of(ctx).viewInsets.bottom),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const Text('Batch apply to selected rows', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.navy)),
+              const SizedBox(height: 14),
+              DropdownButtonFormField<MediaModel>(
+                value: batchMedia,
+                decoration: const InputDecoration(labelText: 'Media', isDense: true),
+                items: _mediaOptions.map((m) => DropdownMenuItem(value: m, child: Text(m.mediaName, overflow: TextOverflow.ellipsis))).toList(),
+                onChanged: (v) => setLocal(() => batchMedia = v),
+              ),
+              const SizedBox(height: 10),
+              InkWell(
+                onTap: () async {
+                  final picked = await showDatePicker(context: context, initialDate: batchDate, firstDate: DateTime(2020), lastDate: DateTime.now());
+                  if (picked != null) setLocal(() => batchDate = picked);
+                },
+                child: InputDecorator(
+                  decoration: const InputDecoration(labelText: 'Date', isDense: true),
+                  child: Text(DateFormat('dd/MM/yyyy').format(batchDate)),
+                ),
+              ),
+              const SizedBox(height: 10),
+              TextField(controller: journalistCtrl, decoration: const InputDecoration(labelText: 'Journalist (optional)', isDense: true)),
+              const SizedBox(height: 16),
+              FilledButton(
+                onPressed: () {
+                  for (final e in _entries.where((x) => x.selected)) {
+                    if (batchMedia != null) e.media = batchMedia;
+                    e.date = batchDate;
+                    if (journalistCtrl.text.trim().isNotEmpty) e.journalistCtrl.text = journalistCtrl.text.trim();
+                  }
+                  setState(() {});
+                  Navigator.pop(ctx);
+                },
+                style: FilledButton.styleFrom(backgroundColor: AppColors.navy),
+                child: const Text('Apply'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return PageScaffold(
@@ -377,8 +436,18 @@ class _MultiUploadScreenState extends State<MultiUploadScreen> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text('Articles (${_entries.length}/$_maxArticles)', style: const TextStyle(fontWeight: FontWeight.w700, color: AppColors.navy)),
-                    if (_entries.length < _maxArticles)
-                      TextButton.icon(onPressed: _addEntry, icon: const Icon(Icons.add_outlined), label: const Text('Add Row')),
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        TextButton.icon(
+                          onPressed: _showBatchApply,
+                          icon: const Icon(Icons.copy_all_outlined, size: 18),
+                          label: const Text('Batch apply'),
+                        ),
+                        if (_entries.length < _maxArticles)
+                          TextButton.icon(onPressed: _addEntry, icon: const Icon(Icons.add_outlined), label: const Text('Add Row')),
+                      ],
+                    ),
                   ],
                 ),
                 const SizedBox(height: 8),
@@ -450,6 +519,41 @@ class _EntryCard extends StatelessWidget {
             decoration: const InputDecoration(labelText: 'Media *', isDense: true),
             items: mediaOptions.map((m) => DropdownMenuItem(value: m, child: Text(m.mediaName, overflow: TextOverflow.ellipsis))).toList(),
             onChanged: (v) { entry.media = v; onChanged(); },
+          ),
+          const SizedBox(height: 10),
+          InkWell(
+            onTap: () async {
+              final picked = await showDatePicker(
+                context: context,
+                initialDate: entry.date,
+                firstDate: DateTime(2020),
+                lastDate: DateTime.now(),
+              );
+              if (picked != null) {
+                entry.date = picked;
+                onChanged();
+              }
+            },
+            borderRadius: BorderRadius.circular(10),
+            child: InputDecorator(
+              decoration: const InputDecoration(
+                labelText: 'Date *',
+                prefixIcon: Icon(Icons.calendar_today_outlined, size: 20),
+                isDense: true,
+              ),
+              child: Text(DateFormat('dd/MM/yyyy').format(entry.date), style: const TextStyle(fontSize: 14)),
+            ),
+          ),
+          const SizedBox(height: 8),
+          DateShortcutRow(
+            onToday: () {
+              entry.date = DateTime.now();
+              onChanged();
+            },
+            onYesterday: () {
+              entry.date = DateTime.now().subtract(const Duration(days: 1));
+              onChanged();
+            },
           ),
           const SizedBox(height: 10),
           TextFormField(controller: entry.titleCtrl, decoration: const InputDecoration(labelText: 'Title *', isDense: true)),

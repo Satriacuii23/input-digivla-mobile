@@ -158,7 +158,7 @@ class UserRbac {
       case AppRole.staffOnline:
         return '/online';
       case AppRole.analis:
-        return '/tools';
+        return '/tools/media-reach';
       default:
         return '/home';
     }

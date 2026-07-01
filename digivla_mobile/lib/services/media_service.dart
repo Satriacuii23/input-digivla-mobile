@@ -11,6 +11,7 @@ class MediaService {
     int limit = 20,
     int? mediaTypeId,
     String? search,
+    String? status,
   }) async {
     final query = <String, String>{
       'page': '$page',
@@ -18,6 +19,7 @@ class MediaService {
     };
     if (mediaTypeId != null) query['media_type_id'] = '$mediaTypeId';
     if (search != null && search.isNotEmpty) query['search'] = search;
+    if (status != null && status.isNotEmpty) query['status'] = status;
 
     final data = await _api.getJson('/media/', query: query);
     final items = (data['data'] as List<dynamic>? ?? [])
@@ -89,6 +91,38 @@ class MediaService {
   Future<void> deleteMedia(int mediaId) async {
     await _api.deleteJson('/media/$mediaId');
   }
+
+  Future<MediaBatchResult> createMediaBatch(List<Map<String, dynamic>> mediaList) async {
+    final data = await _api.postJson('/media/batch', {'media_list': mediaList});
+    return MediaBatchResult.fromJson(data);
+  }
+
+  Future<MediaBatchResult> bulkImportFile({
+    required List<int> bytes,
+    required String filename,
+  }) async {
+    final data = await _api.uploadMultipart(
+      '/media/bulk',
+      fileField: 'file',
+      bytes: bytes,
+      filename: filename,
+    );
+    return MediaBatchResult.fromJson(data);
+  }
+}
+
+class MediaBatchResult {
+  const MediaBatchResult({required this.createdCount, required this.mediaIds, this.failed = const []});
+
+  final int createdCount;
+  final List<int> mediaIds;
+  final List<dynamic> failed;
+
+  factory MediaBatchResult.fromJson(Map<String, dynamic> json) => MediaBatchResult(
+        createdCount: json['created_count'] as int? ?? 0,
+        mediaIds: (json['media_ids'] as List<dynamic>? ?? []).map((e) => e as int).toList(),
+        failed: json['failed'] as List<dynamic>? ?? [],
+      );
 }
 
 class PaginatedMedia {

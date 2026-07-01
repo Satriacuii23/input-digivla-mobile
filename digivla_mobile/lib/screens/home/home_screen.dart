@@ -108,6 +108,22 @@ class _HomeScreenState extends State<HomeScreen> {
                       badge: 'MEDIA',
                       onTap: () => context.go('/media'),
                     ),
+                  if (user?.canManageMedia ?? false)
+                    QuickActionTile(
+                      icon: Icons.add_circle_outline,
+                      label: 'Add Media',
+                      count: 'Register outlet',
+                      badge: 'MEDIA',
+                      onTap: () => context.push('/media/add'),
+                    ),
+                  if (user?.canWriteChannel('tv') ?? false)
+                    QuickActionTile(
+                      icon: Icons.upload_outlined,
+                      label: 'Upload TV',
+                      count: 'Single or multi',
+                      badge: 'TV',
+                      onTap: () => context.push('/tv/upload'),
+                    ),
                   if (user?.canAccessRoute('/tv') ?? false)
                     QuickActionTile(
                       icon: Icons.tv_outlined,
@@ -116,6 +132,14 @@ class _HomeScreenState extends State<HomeScreen> {
                       badge: 'TV',
                       onTap: () => context.go('/tv'),
                     ),
+                  if (user?.canWriteChannel('radio') ?? false)
+                    QuickActionTile(
+                      icon: Icons.upload_outlined,
+                      label: 'Upload Radio',
+                      count: 'Single or multi',
+                      badge: 'RADIO',
+                      onTap: () => context.push('/radio/upload'),
+                    ),
                   if (user?.canAccessRoute('/radio') ?? false)
                     QuickActionTile(
                       icon: Icons.radio_outlined,
@@ -123,6 +147,14 @@ class _HomeScreenState extends State<HomeScreen> {
                       count: '${_stats!.totalRadio} total · +${_stats!.todayRadio} today',
                       badge: 'RADIO',
                       onTap: () => context.go('/radio'),
+                    ),
+                  if (user?.canWriteChannel('online') ?? false)
+                    QuickActionTile(
+                      icon: Icons.upload_outlined,
+                      label: 'Upload Online',
+                      count: 'Scrape + multi',
+                      badge: 'ONLINE',
+                      onTap: () => context.push('/online/upload'),
                     ),
                   if (user?.canAccessRoute('/online') ?? false)
                     QuickActionTile(
@@ -156,14 +188,22 @@ class _HomeScreenState extends State<HomeScreen> {
                       badge: 'QC',
                       onTap: () => context.push('/qc/online'),
                     ),
-                  if (user?.canUseTools ?? false)
+                  if (user?.canUseTools ?? false) ...[
+                    QuickActionTile(
+                      icon: Icons.travel_explore_outlined,
+                      label: 'Media Reach',
+                      count: 'SimilarWeb crawler',
+                      badge: 'TOOLS',
+                      onTap: () => context.push('/tools/media-reach'),
+                    ),
                     QuickActionTile(
                       icon: Icons.build_outlined,
-                      label: 'Tools',
-                      count: 'Media Reach',
+                      label: 'All Tools',
+                      count: 'Tools & helpers',
                       badge: 'TOOLS',
                       onTap: () => context.push('/tools'),
                     ),
+                  ],
                   if (user?.canManageUsers ?? false)
                     QuickActionTile(
                       icon: Icons.manage_accounts_outlined,

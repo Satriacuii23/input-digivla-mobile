@@ -5,9 +5,12 @@ import 'package:provider/provider.dart';
 import '../../config/theme.dart';
 import '../../core/auth/auth_provider.dart';
 import '../../models/article.dart';
+import '../../models/media.dart';
 import '../../services/article_service.dart';
+import '../../services/media_service.dart';
 import '../../widgets/app_scaffold.dart';
 import '../../widgets/digivla_widgets.dart';
+import '../../widgets/list_filters.dart';
 
 class ArticleListScreen extends StatefulWidget {
   const ArticleListScreen({super.key, required this.channel});
@@ -20,23 +23,43 @@ class ArticleListScreen extends StatefulWidget {
 
 class _ArticleListScreenState extends State<ArticleListScreen> {
   late final ArticleService _service;
+  late final MediaService _mediaService;
   final _searchCtrl = TextEditingController();
   final _scrollCtrl = ScrollController();
 
   List<ArticleModel> _items = [];
+  List<MediaModel> _mediaOptions = [];
   int _page = 1;
   bool _hasMore = true;
   int _total = 0;
   bool _loading = true;
   bool _loadingMore = false;
   String? _error;
+  final _dateFilter = ArticleDateFilterState();
+  int? _mediaFilterId;
 
   @override
   void initState() {
     super.initState();
     _service = ArticleService(context.read<AuthProvider>().api);
+    _mediaService = MediaService(context.read<AuthProvider>().api);
     _scrollCtrl.addListener(_onScroll);
+    _loadMediaOptions();
     _load(refresh: true);
+  }
+
+  Future<void> _loadMediaOptions() async {
+    final typeId = widget.channel.mediaTypeId;
+    if (typeId == null) return;
+    try {
+      final list = await _mediaService.listByType(typeId);
+      if (mounted) setState(() => _mediaOptions = list);
+    } catch (_) {}
+  }
+
+  Map<String, String?> get _queryDates {
+    final r = _dateFilter.apiRange;
+    return {'start': r.start, 'end': r.end};
   }
 
   @override
@@ -61,10 +84,14 @@ class _ArticleListScreenState extends State<ArticleListScreen> {
       });
     }
     try {
+      final dates = _queryDates;
       final result = await _service.listArticles(
         channel: widget.channel,
         page: 1,
         search: _searchCtrl.text.trim().isEmpty ? null : _searchCtrl.text.trim(),
+        mediaId: _mediaFilterId,
+        startDate: dates['start'],
+        endDate: dates['end'],
       );
       if (!mounted) return;
       setState(() {
@@ -87,10 +114,14 @@ class _ArticleListScreenState extends State<ArticleListScreen> {
     if (_loadingMore || !_hasMore) return;
     setState(() => _loadingMore = true);
     try {
+      final dates = _queryDates;
       final result = await _service.listArticles(
         channel: widget.channel,
         page: _page + 1,
         search: _searchCtrl.text.trim().isEmpty ? null : _searchCtrl.text.trim(),
+        mediaId: _mediaFilterId,
+        startDate: dates['start'],
+        endDate: dates['end'],
       );
       if (!mounted) return;
       setState(() {
@@ -138,7 +169,7 @@ class _ArticleListScreenState extends State<ArticleListScreen> {
 
     return TabPageScaffold(
       title: widget.channel.listTitle,
-      subtitle: '$_total articles',
+      subtitle: '$_total articles · ${_dateFilter.label}',
       floatingActionButton: canUpload
           ? FloatingActionButton.extended(
               onPressed: _showUploadMenu,
@@ -151,10 +182,33 @@ class _ArticleListScreenState extends State<ArticleListScreen> {
         children: [
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-            child: TextField(
-              controller: _searchCtrl,
-              decoration: const InputDecoration(hintText: 'Cari judul atau konten…', prefixIcon: Icon(Icons.search), isDense: true),
-              onSubmitted: (_) => _load(refresh: true),
+            child: Column(
+              children: [
+                TextField(
+                  controller: _searchCtrl,
+                  decoration: const InputDecoration(hintText: 'Search title or content…', prefixIcon: Icon(Icons.search), isDense: true),
+                  onSubmitted: (_) => _load(refresh: true),
+                ),
+                const SizedBox(height: 10),
+                ArticleDateFilterRow(
+                  state: _dateFilter,
+                  onChanged: (p) {
+                    setState(() => _dateFilter.preset = p);
+                    _load(refresh: true);
+                  },
+                ),
+                if (_mediaOptions.isNotEmpty) ...[
+                  const SizedBox(height: 10),
+                  MediaFilterDropdown(
+                    options: _mediaOptions,
+                    selectedId: _mediaFilterId,
+                    onChanged: (v) {
+                      setState(() => _mediaFilterId = v);
+                      _load(refresh: true);
+                    },
+                  ),
+                ],
+              ],
             ),
           ),
           Expanded(

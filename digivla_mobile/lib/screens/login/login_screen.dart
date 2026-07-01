@@ -270,7 +270,7 @@ class _LoginFooterState extends State<_LoginFooter> {
       _testing = false;
       _pingResult = ok
           ? 'Server OK — ${ApiConfig.baseUrl}'
-          : 'Server tidak terjangkau dari HP ini. Gunakan WiFi LAN yang sama dengan VM (192.168.100.x), atau APK build ngrok untuk luar jaringan.';
+          : 'Server tidak terjangkau. Periksa koneksi jaringan Anda.';
     });
   }
 

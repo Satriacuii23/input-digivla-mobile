@@ -1,11 +1,12 @@
 # Build Digivla mobile APK (Flutter — bukan Expo)
-# API: https://input-digivla.ngrok.app (testing dari luar jaringan)
+# API: http://192.168.100.50:8005 (default LAN)
 
 $ErrorActionPreference = "Stop"
 $Flutter = "C:\Tools\flutter\bin\flutter.bat"
 $MobileDir = $PSScriptRoot
 $OutDir = Join-Path $MobileDir "releases"
-$ApiUrl = if ($env:API_BASE_URL) { $env:API_BASE_URL } else { "https://input-digivla.ngrok.app" }
+$ApiUrl = if ($env:API_BASE_URL) { $env:API_BASE_URL } else { "http://192.168.100.50:8005" }
+$ApkName = "digivla-mobile.apk"
 
 Push-Location (Join-Path $MobileDir "digivla_mobile")
 & $Flutter pub get
@@ -13,7 +14,7 @@ Push-Location (Join-Path $MobileDir "digivla_mobile")
 
 New-Item -ItemType Directory -Force -Path $OutDir | Out-Null
 $apk = Join-Path $MobileDir "digivla_mobile\build\app\outputs\flutter-apk\app-release.apk"
-$dest = Join-Path $OutDir "digivla-mobile.apk"
+$dest = Join-Path $OutDir $ApkName
 Copy-Item $apk $dest -Force
 Write-Host ""
 Write-Host "APK: $dest"
