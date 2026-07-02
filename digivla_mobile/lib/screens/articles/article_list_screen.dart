@@ -220,8 +220,7 @@ class _ArticleListScreenState extends State<ArticleListScreen> {
                     _load(refresh: true);
                   },
                 ),
-                  ),
-                ],
+
                 const SizedBox(height: 10),
                 Row(
                   children: [

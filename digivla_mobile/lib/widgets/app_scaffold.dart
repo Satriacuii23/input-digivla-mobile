@@ -639,6 +639,7 @@ class PageScaffold extends StatelessWidget {
     this.subtitle,
     this.actions,
     this.showHome = true,
+    this.floatingActionButton,
   });
 
   final String title;
@@ -646,6 +647,7 @@ class PageScaffold extends StatelessWidget {
   final Widget body;
   final List<Widget>? actions;
   final bool showHome;
+  final Widget? floatingActionButton;
 
   @override
   Widget build(BuildContext context) {
@@ -670,6 +672,7 @@ class PageScaffold extends StatelessWidget {
           ...?actions,
         ],
       ),
+      floatingActionButton: floatingActionButton,
       body: SafeArea(top: false, child: body),
     );
   }
