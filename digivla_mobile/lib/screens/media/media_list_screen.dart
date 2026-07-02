@@ -148,36 +148,43 @@ class _MediaListScreenState extends State<MediaListScreen> {
                   onSubmitted: (_) => _load(refresh: true),
                 ),
                 const SizedBox(height: 10),
-                StatusFilterRow(
-                  selected: _filterStatus,
-                  onChanged: (v) {
-                    setState(() => _filterStatus = v);
-                    _load(refresh: true);
-                  },
-                ),
-                const SizedBox(height: 10),
-                SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Row(
-                    children: [
-                      _FilterChip(label: 'Semua', selected: _filterTypeId == null, onTap: () {
-                        setState(() => _filterTypeId = null);
-                        _load(refresh: true);
-                      }),
-                      _FilterChip(label: 'TV', selected: _filterTypeId == 12, onTap: () {
-                        setState(() => _filterTypeId = 12);
-                        _load(refresh: true);
-                      }),
-                      _FilterChip(label: 'Radio', selected: _filterTypeId == 13, onTap: () {
-                        setState(() => _filterTypeId = 13);
-                        _load(refresh: true);
-                      }),
-                      _FilterChip(label: 'Online', selected: _filterTypeId == 4, onTap: () {
-                        setState(() => _filterTypeId = 4);
-                        _load(refresh: true);
-                      }),
-                    ],
-                  ),
+                Row(
+                  children: [
+                    Expanded(
+                      child: DropdownButtonFormField<String>(
+                        value: _filterStatus,
+                        isExpanded: true,
+                        decoration: const InputDecoration(labelText: 'Status', isDense: true, prefixIcon: Icon(Icons.check_circle_outline, size: 18), contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 10)),
+                        items: const [
+                          DropdownMenuItem(value: 'Active', child: Text('Active', style: TextStyle(fontSize: 13))),
+                          DropdownMenuItem(value: 'Inactive', child: Text('Inactive', style: TextStyle(fontSize: 13))),
+                          DropdownMenuItem(value: 'All', child: Text('Semua', style: TextStyle(fontSize: 13))),
+                        ],
+                        onChanged: (v) {
+                          setState(() => _filterStatus = v ?? 'Active');
+                          _load(refresh: true);
+                        },
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: DropdownButtonFormField<int?>(
+                        value: _filterTypeId,
+                        isExpanded: true,
+                        decoration: const InputDecoration(labelText: 'Media Type', isDense: true, prefixIcon: Icon(Icons.category_outlined, size: 18), contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 10)),
+                        items: const [
+                          DropdownMenuItem(value: null, child: Text('Semua', style: TextStyle(fontSize: 13))),
+                          DropdownMenuItem(value: 12, child: Text('TV', style: TextStyle(fontSize: 13))),
+                          DropdownMenuItem(value: 13, child: Text('Radio', style: TextStyle(fontSize: 13))),
+                          DropdownMenuItem(value: 4, child: Text('Online', style: TextStyle(fontSize: 13))),
+                        ],
+                        onChanged: (v) {
+                          setState(() => _filterTypeId = v);
+                          _load(refresh: true);
+                        },
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),

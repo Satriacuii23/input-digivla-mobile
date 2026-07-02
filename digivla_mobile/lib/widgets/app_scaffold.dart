@@ -16,6 +16,7 @@ import 'account_menu.dart';
 /// Shared bottom navigation routes.
 class DigivlaNav {
   static const tabs = [
+    _TabDef(label: 'Home', route: '/home', icon: Icons.home_outlined, activeIcon: Icons.home),
     _TabDef(label: 'Media', route: '/media', icon: Icons.storage_outlined, activeIcon: Icons.storage),
     _TabDef(label: 'TV', route: '/tv', icon: Icons.tv_outlined, activeIcon: Icons.tv),
     _TabDef(label: 'Radio', route: '/radio', icon: Icons.radio_outlined, activeIcon: Icons.radio),
@@ -111,26 +112,11 @@ class _DigivlaDrawerState extends State<DigivlaDrawer> {
               decoration: BoxDecoration(
                 border: Border(bottom: BorderSide(color: Colors.white.withValues(alpha: 0.1))),
               ),
-              child: Row(
-                children: [
-                  const DigivlaLogoIcon(size: 36),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          'Digivla IDS',
-                          style: TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.w600),
-                        ),
-                        Text(
-                          'Media Operations',
-                          style: TextStyle(color: Colors.white.withValues(alpha: 0.55), fontSize: 11),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
+              child: Image.asset(
+                'assets/logo/digivla_logo.png',
+                height: 48,
+                fit: BoxFit.contain,
+                alignment: Alignment.centerLeft,
               ),
             ),
 
@@ -615,11 +601,15 @@ class TabPageScaffold extends StatelessWidget {
               Text(subtitle!, style: const TextStyle(fontSize: 11, color: AppColors.textSecondary, fontWeight: FontWeight.w400)),
           ],
         ),
-        actions: const [
-          AccountMenuButton(),
+        actions: [
+          const AccountMenuButton(),
           Padding(
-            padding: EdgeInsets.only(right: 12),
-            child: DigivlaLogoIcon(size: 32),
+            padding: const EdgeInsets.only(right: 12),
+            child: Image.asset(
+              'assets/logo/digivla_logo.png',
+              height: 28,
+              fit: BoxFit.contain,
+            ),
           ),
         ],
       ),

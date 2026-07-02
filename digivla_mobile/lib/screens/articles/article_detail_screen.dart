@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'package:video_player/video_player.dart';
 
 import '../../config/theme.dart';
 import '../../core/auth/auth_provider.dart';
@@ -22,11 +23,24 @@ class ArticleDetailScreen extends StatefulWidget {
 class _ArticleDetailScreenState extends State<ArticleDetailScreen> {
   late final ArticleService _service;
   bool _deleting = false;
+  VideoPlayerController? _videoController;
 
   @override
   void initState() {
     super.initState();
     _service = ArticleService(context.read<AuthProvider>().api);
+    if (widget.channel == ArticleChannel.tv && widget.article.filee != null && widget.article.filee!.isNotEmpty) {
+      _videoController = VideoPlayerController.networkUrl(Uri.parse(widget.article.filee!))
+        ..initialize().then((_) {
+          if (mounted) setState(() {});
+        });
+    }
+  }
+
+  @override
+  void dispose() {
+    _videoController?.dispose();
+    super.dispose();
   }
 
   Future<void> _delete() async {
@@ -94,6 +108,34 @@ class _ArticleDetailScreenState extends State<ArticleDetailScreen> {
               ],
             ),
           ),
+          if (_videoController != null && _videoController!.value.isInitialized) ...[
+            const SizedBox(height: 16),
+            DigivlaCard(
+              padding: EdgeInsets.zero,
+              child: Column(
+                children: [
+                  AspectRatio(
+                    aspectRatio: _videoController!.value.aspectRatio,
+                    child: VideoPlayer(_videoController!),
+                  ),
+                  VideoProgressIndicator(_videoController!, allowScrubbing: true),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      IconButton(
+                        icon: Icon(_videoController!.value.isPlaying ? Icons.pause : Icons.play_arrow),
+                        onPressed: () {
+                          setState(() {
+                            _videoController!.value.isPlaying ? _videoController!.pause() : _videoController!.play();
+                          });
+                        },
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
           const SizedBox(height: 16),
           DigivlaCard(
             child: Column(

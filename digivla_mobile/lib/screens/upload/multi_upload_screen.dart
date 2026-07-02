@@ -433,22 +433,22 @@ class _MultiUploadScreenState extends State<MultiUploadScreen> {
                   const SizedBox(height: 16),
                 ],
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text('Articles (${_entries.length}/$_maxArticles)', style: const TextStyle(fontWeight: FontWeight.w700, color: AppColors.navy)),
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        TextButton.icon(
-                          onPressed: _showBatchApply,
-                          icon: const Icon(Icons.copy_all_outlined, size: 18),
-                          label: const Text('Batch apply'),
-                        ),
-                        if (_entries.length < _maxArticles)
-                          TextButton.icon(onPressed: _addEntry, icon: const Icon(Icons.add_outlined), label: const Text('Add Row')),
-                      ],
+                    Expanded(
+                      child: Text('Articles (${_entries.length}/$_maxArticles)', style: const TextStyle(fontWeight: FontWeight.w700, color: AppColors.navy)),
                     ),
+                    if (_entries.length < _maxArticles)
+                      OutlinedButton.icon(onPressed: _addEntry, icon: const Icon(Icons.add_outlined, size: 18), label: const Text('Add Row'), style: OutlinedButton.styleFrom(visualDensity: VisualDensity.compact)),
                   ],
+                ),
+                const SizedBox(height: 12),
+                SizedBox(
+                  width: double.infinity,
+                  child: FilledButton.tonalIcon(
+                    onPressed: _showBatchApply,
+                    icon: const Icon(Icons.copy_all_outlined),
+                    label: const Text('Batch Apply Settings (Media & Date)'),
+                  ),
                 ),
                 const SizedBox(height: 8),
                 if (_submitting)

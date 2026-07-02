@@ -64,6 +64,9 @@ class _MediaMultiAddTabState extends State<MediaMultiAddTab> {
         'language': r.language,
         'status': r.active ? 'Active' : 'Inactive',
         if (r.tier != null) 'tier': r.tier,
+        if (r.circCtrl.text.trim().isNotEmpty) 'circulation': int.tryParse(r.circCtrl.text.trim()),
+        if (r.rateBwCtrl.text.trim().isNotEmpty) 'rate_bw': double.tryParse(r.rateBwCtrl.text.trim()),
+        if (r.rateFcCtrl.text.trim().isNotEmpty) 'rate_fc': double.tryParse(r.rateFcCtrl.text.trim()),
       });
     }
     if (payload.isEmpty) {
@@ -115,6 +118,77 @@ class _MediaMultiAddTabState extends State<MediaMultiAddTab> {
                   items: _types.map((t) => DropdownMenuItem(value: t.mediaTypeId, child: Text(t.label))).toList(),
                   onChanged: (v) => setState(() => _rows[i].typeId = v),
                 ),
+                const SizedBox(height: 10),
+                Row(
+                  children: [
+                    Expanded(
+                      child: DropdownButtonFormField<String>(
+                        value: _rows[i].language,
+                        decoration: const InputDecoration(labelText: 'Language', isDense: true),
+                        items: const [
+                          DropdownMenuItem(value: 'IDN', child: Text('Indonesian')),
+                          DropdownMenuItem(value: 'ENG', child: Text('English')),
+                        ],
+                        onChanged: (v) => setState(() => _rows[i].language = v ?? 'IDN'),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: DropdownButtonFormField<String?>(
+                        value: _rows[i].tier,
+                        decoration: const InputDecoration(labelText: 'Tier', isDense: true),
+                        items: const [
+                          DropdownMenuItem(value: null, child: Text('- None -')),
+                          DropdownMenuItem(value: 'Nasional', child: Text('Nasional')),
+                          DropdownMenuItem(value: 'Lokal', child: Text('Lokal')),
+                          DropdownMenuItem(value: 'Top Tier', child: Text('Top Tier')),
+                        ],
+                        onChanged: (v) => setState(() => _rows[i].tier = v),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        controller: _rows[i].circCtrl,
+                        keyboardType: TextInputType.number,
+                        decoration: const InputDecoration(labelText: 'Circulation', isDense: true),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: SwitchListTile(
+                        contentPadding: EdgeInsets.zero,
+                        title: const Text('Active', style: TextStyle(fontSize: 13)),
+                        value: _rows[i].active,
+                        onChanged: (v) => setState(() => _rows[i].active = v),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        controller: _rows[i].rateBwCtrl,
+                        keyboardType: TextInputType.number,
+                        decoration: const InputDecoration(labelText: 'Rate BW', prefixText: 'Rp', isDense: true),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: TextField(
+                        controller: _rows[i].rateFcCtrl,
+                        keyboardType: TextInputType.number,
+                        decoration: const InputDecoration(labelText: 'Rate FC', prefixText: 'Rp', isDense: true),
+                      ),
+                    ),
+                  ],
+                ),
                 if (_rows.length > 1)
                   Align(
                     alignment: Alignment.centerRight,
@@ -158,10 +232,18 @@ class _MediaMultiAddTabState extends State<MediaMultiAddTab> {
 
 class _MediaRow {
   final nameCtrl = TextEditingController();
+  final circCtrl = TextEditingController();
+  final rateBwCtrl = TextEditingController();
+  final rateFcCtrl = TextEditingController();
   int? typeId;
   String language = 'IDN';
   String? tier;
   bool active = true;
 
-  void dispose() => nameCtrl.dispose();
+  void dispose() {
+    nameCtrl.dispose();
+    circCtrl.dispose();
+    rateBwCtrl.dispose();
+    rateFcCtrl.dispose();
+  }
 }
