@@ -2,11 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
+import '../config/nav_config.dart';
 import '../config/theme.dart';
 import '../core/auth/auth_provider.dart';
 import '../core/auth/rbac.dart';
 import 'digivla_logo.dart';
 import 'account_menu.dart';
+
+// ═══════════════════════════════════════════════════════════════
+//  Bottom navigation tabs (Media, TV, Radio, Online)
+// ═══════════════════════════════════════════════════════════════
 
 /// Shared bottom navigation routes.
 class DigivlaNav {
@@ -39,7 +44,359 @@ class _TabDef {
   final IconData activeIcon;
 }
 
-/// Beranda button — pill style for app bar.
+// ═══════════════════════════════════════════════════════════════
+//  Navy sidebar drawer — mirrors Frontend admin-layout.tsx
+// ═══════════════════════════════════════════════════════════════
+
+class DigivlaDrawer extends StatefulWidget {
+  const DigivlaDrawer({super.key});
+
+  @override
+  State<DigivlaDrawer> createState() => _DigivlaDrawerState();
+}
+
+class _DigivlaDrawerState extends State<DigivlaDrawer> {
+  String? _openGroup;
+
+  @override
+  void initState() {
+    super.initState();
+    _openGroup = _groupKeyFromRoute(_currentRoute);
+  }
+
+  String get _currentRoute {
+    try {
+      return GoRouterState.of(context).uri.path;
+    } catch (_) {
+      return '/home';
+    }
+  }
+
+  String? _groupKeyFromRoute(String path) {
+    if (path.startsWith('/users')) return 'users';
+    if (path.startsWith('/media')) return 'media';
+    if (path.startsWith('/qc')) return 'qc';
+    if (path.startsWith('/tools')) return 'tools';
+    if (path.startsWith('/tv')) return 'tv';
+    if (path.startsWith('/radio')) return 'radio';
+    if (path.startsWith('/online')) return 'online';
+    return null;
+  }
+
+  bool _isActive(String route) {
+    final current = _currentRoute;
+    return current == route || current.startsWith('$route/');
+  }
+
+  void _navigate(String route) {
+    Navigator.of(context).pop();
+    context.go(route);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final auth = context.watch<AuthProvider>();
+    final user = auth.user;
+    final items = NavConfig.itemsForRole(user?.role);
+
+    return Drawer(
+      backgroundColor: AppColors.navy,
+      shape: const RoundedRectangleBorder(),
+      child: SafeArea(
+        child: Column(
+          children: [
+            // ── Header ──
+            Container(
+              padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
+              decoration: BoxDecoration(
+                border: Border(bottom: BorderSide(color: Colors.white.withValues(alpha: 0.1))),
+              ),
+              child: Row(
+                children: [
+                  const DigivlaLogoIcon(size: 36),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Digivla IDS',
+                          style: TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.w600),
+                        ),
+                        Text(
+                          'Media Operations',
+                          style: TextStyle(color: Colors.white.withValues(alpha: 0.55), fontSize: 11),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            // ── Navigation ──
+            Expanded(
+              child: ListView(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                children: [
+                  for (final item in items) _buildItem(item),
+                ],
+              ),
+            ),
+
+            // ── Profile footer ──
+            if (user != null)
+              Container(
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+                decoration: BoxDecoration(
+                  border: Border(top: BorderSide(color: Colors.white.withValues(alpha: 0.1))),
+                ),
+                child: Column(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.06),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Row(
+                        children: [
+                          CircleAvatar(
+                            radius: 16,
+                            backgroundColor: Colors.white.withValues(alpha: 0.15),
+                            child: Text(
+                              user.displayName.isNotEmpty ? user.displayName[0].toUpperCase() : '?',
+                              style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 13),
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  user.displayName,
+                                  style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w600),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                Text(
+                                  user.roleLabel,
+                                  style: TextStyle(color: Colors.white.withValues(alpha: 0.5), fontSize: 11),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    SizedBox(
+                      width: double.infinity,
+                      child: TextButton.icon(
+                        onPressed: () async {
+                          Navigator.of(context).pop();
+                          await auth.logout();
+                          if (context.mounted) context.go('/login');
+                        },
+                        icon: Icon(Icons.logout, size: 18, color: Colors.white.withValues(alpha: 0.7)),
+                        label: Text(
+                          'Logout',
+                          style: TextStyle(color: Colors.white.withValues(alpha: 0.7), fontSize: 13),
+                        ),
+                        style: TextButton.styleFrom(
+                          alignment: Alignment.centerLeft,
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildItem(NavItem item) {
+    if (item is NavSection) return _buildSection(item);
+    if (item is NavLink) return _buildLink(item);
+    if (item is NavGroup) return _buildGroup(item);
+    return const SizedBox.shrink();
+  }
+
+  Widget _buildSection(NavSection section) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(8, 16, 8, 6),
+      child: Text(
+        section.label.toUpperCase(),
+        style: TextStyle(
+          color: Colors.white.withValues(alpha: 0.35),
+          fontSize: 10,
+          fontWeight: FontWeight.w700,
+          letterSpacing: 1.2,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLink(NavLink link) {
+    final active = _isActive(link.route);
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 2),
+      child: Material(
+        color: active ? Colors.white : Colors.transparent,
+        borderRadius: BorderRadius.circular(8),
+        child: InkWell(
+          onTap: () => _navigate(link.route),
+          borderRadius: BorderRadius.circular(8),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            child: Row(
+              children: [
+                Icon(link.icon, size: 18, color: active ? AppColors.navy : Colors.white.withValues(alpha: 0.7)),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        link.label,
+                        style: TextStyle(
+                          color: active ? AppColors.navy : Colors.white,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      if (link.description != null)
+                        Text(
+                          link.description!,
+                          style: TextStyle(
+                            color: active ? AppColors.navy.withValues(alpha: 0.6) : Colors.white.withValues(alpha: 0.4),
+                            fontSize: 10,
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildGroup(NavGroup group) {
+    final isOpen = _openGroup == group.key;
+    final groupActive = group.children.any((c) => _isActive(c.route));
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 2),
+      child: Column(
+        children: [
+          Material(
+            color: groupActive ? Colors.white.withValues(alpha: 0.1) : Colors.transparent,
+            borderRadius: BorderRadius.circular(8),
+            child: InkWell(
+              onTap: () => setState(() => _openGroup = isOpen ? null : group.key),
+              borderRadius: BorderRadius.circular(8),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                child: Row(
+                  children: [
+                    Icon(group.icon, size: 18, color: groupActive ? Colors.white : Colors.white.withValues(alpha: 0.7)),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            group.label,
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 13,
+                              fontWeight: groupActive ? FontWeight.w600 : FontWeight.w500,
+                            ),
+                          ),
+                          if (group.description != null)
+                            Text(
+                              group.description!,
+                              style: TextStyle(color: Colors.white.withValues(alpha: 0.4), fontSize: 10),
+                            ),
+                        ],
+                      ),
+                    ),
+                    AnimatedRotation(
+                      turns: isOpen ? 0.25 : 0,
+                      duration: const Duration(milliseconds: 200),
+                      child: Icon(Icons.chevron_right, size: 16, color: Colors.white.withValues(alpha: 0.5)),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          // Children
+          AnimatedCrossFade(
+            duration: const Duration(milliseconds: 200),
+            crossFadeState: isOpen ? CrossFadeState.showFirst : CrossFadeState.showSecond,
+            firstChild: Container(
+              margin: const EdgeInsets.only(left: 16, top: 2),
+              decoration: BoxDecoration(
+                border: Border(left: BorderSide(color: Colors.white.withValues(alpha: 0.1))),
+              ),
+              child: Column(
+                children: group.children.map((child) {
+                  final childActive = _isActive(child.route);
+                  return Material(
+                    color: childActive ? Colors.white : Colors.transparent,
+                    borderRadius: BorderRadius.circular(8),
+                    child: InkWell(
+                      onTap: () => _navigate(child.route),
+                      borderRadius: BorderRadius.circular(8),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              child.label,
+                              style: TextStyle(
+                                color: childActive ? AppColors.navy : Colors.white.withValues(alpha: 0.65),
+                                fontSize: 12,
+                                fontWeight: childActive ? FontWeight.w600 : FontWeight.w400,
+                              ),
+                            ),
+                            if (child.description != null)
+                              Text(
+                                child.description!,
+                                style: TextStyle(
+                                  color: childActive ? AppColors.navy.withValues(alpha: 0.5) : Colors.white.withValues(alpha: 0.3),
+                                  fontSize: 10,
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  );
+                }).toList(),
+              ),
+            ),
+            secondChild: const SizedBox.shrink(),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  Beranda button (Home pill)
+// ═══════════════════════════════════════════════════════════════
+
 class HomeNavButton extends StatelessWidget {
   const HomeNavButton({super.key, this.compact = false});
 
@@ -74,7 +431,10 @@ class HomeNavButton extends StatelessWidget {
   }
 }
 
-/// Bottom nav bar — Media, TV, Radio, Online. [selectedIndex] null = none (home page).
+// ═══════════════════════════════════════════════════════════════
+//  Bottom navigation bar
+// ═══════════════════════════════════════════════════════════════
+
 class DigivlaBottomNavBar extends StatelessWidget {
   const DigivlaBottomNavBar({
     super.key,
@@ -162,6 +522,10 @@ class _NavItem extends StatelessWidget {
   }
 }
 
+// ═══════════════════════════════════════════════════════════════
+//  Shell widgets — with drawer + bottom nav
+// ═══════════════════════════════════════════════════════════════
+
 /// Shell with bottom navigation — Media, TV, Radio, Online.
 class MainShell extends StatelessWidget {
   const MainShell({super.key, required this.navigationShell});
@@ -177,6 +541,7 @@ class MainShell extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: AppColors.background,
+      drawer: const DigivlaDrawer(),
       body: SafeArea(bottom: false, child: navigationShell),
       bottomNavigationBar: DigivlaBottomNavBar(
         tabs: tabs,
@@ -200,6 +565,7 @@ class HomeShell extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: AppColors.background,
+      drawer: const DigivlaDrawer(),
       body: SafeArea(bottom: false, child: child),
       bottomNavigationBar: DigivlaBottomNavBar(
         tabs: tabs,
@@ -210,7 +576,11 @@ class HomeShell extends StatelessWidget {
   }
 }
 
-/// List tab page — Beranda pill + logo, SafeArea content.
+// ═══════════════════════════════════════════════════════════════
+//  Page scaffolds — with drawer hamburger menu
+// ═══════════════════════════════════════════════════════════════
+
+/// List tab page — hamburger + Beranda pill + logo, SafeArea content.
 class TabPageScaffold extends StatelessWidget {
   const TabPageScaffold({
     super.key,
@@ -230,10 +600,12 @@ class TabPageScaffold extends StatelessWidget {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        leadingWidth: 100,
-        leading: const Padding(
-          padding: EdgeInsets.only(left: 8),
-          child: HomeNavButton(),
+        leading: Builder(
+          builder: (ctx) => IconButton(
+            icon: const Icon(Icons.menu),
+            tooltip: 'Menu',
+            onPressed: () => Scaffold.of(ctx).openDrawer(),
+          ),
         ),
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -251,13 +623,14 @@ class TabPageScaffold extends StatelessWidget {
           ),
         ],
       ),
+      drawer: const DigivlaDrawer(),
       floatingActionButton: floatingActionButton,
       body: SafeArea(top: false, child: body),
     );
   }
 }
 
-/// Secondary pages — upload, preview, edit (back + Beranda).
+/// Secondary pages — upload, preview, edit (back + hamburger).
 class PageScaffold extends StatelessWidget {
   const PageScaffold({
     super.key,

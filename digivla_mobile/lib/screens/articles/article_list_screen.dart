@@ -37,6 +37,27 @@ class _ArticleListScreenState extends State<ArticleListScreen> {
   String? _error;
   final _dateFilter = ArticleDateFilterState();
   int? _mediaFilterId;
+  String _sortBy = 'newest';
+
+  void _applySort() {
+    if (_items.isEmpty) return;
+    setState(() {
+      switch (_sortBy) {
+        case 'newest':
+          _items.sort((a, b) => (b.datee ?? '').compareTo(a.datee ?? ''));
+          break;
+        case 'oldest':
+          _items.sort((a, b) => (a.datee ?? '').compareTo(b.datee ?? ''));
+          break;
+        case 'title_asc':
+          _items.sort((a, b) => a.title.toLowerCase().compareTo(b.title.toLowerCase()));
+          break;
+        case 'title_desc':
+          _items.sort((a, b) => b.title.toLowerCase().compareTo(a.title.toLowerCase()));
+          break;
+      }
+    });
+  }
 
   @override
   void initState() {
@@ -101,6 +122,7 @@ class _ArticleListScreenState extends State<ArticleListScreen> {
         _total = result.pagination.total;
         _loading = false;
       });
+      _applySort();
     } catch (e) {
       if (!mounted) return;
       setState(() {
@@ -130,6 +152,7 @@ class _ArticleListScreenState extends State<ArticleListScreen> {
         _hasMore = result.pagination.hasMore;
         _loadingMore = false;
       });
+      _applySort();
     } catch (_) {
       if (mounted) setState(() => _loadingMore = false);
     }
@@ -197,17 +220,52 @@ class _ArticleListScreenState extends State<ArticleListScreen> {
                     _load(refresh: true);
                   },
                 ),
-                if (_mediaOptions.isNotEmpty) ...[
-                  const SizedBox(height: 10),
-                  MediaFilterDropdown(
-                    options: _mediaOptions,
-                    selectedId: _mediaFilterId,
-                    onChanged: (v) {
-                      setState(() => _mediaFilterId = v);
-                      _load(refresh: true);
-                    },
                   ),
                 ],
+                const SizedBox(height: 10),
+                Row(
+                  children: [
+                    Expanded(
+                      flex: 3,
+                      child: _mediaOptions.isNotEmpty
+                          ? MediaFilterDropdown(
+                              options: _mediaOptions,
+                              selectedId: _mediaFilterId,
+                              onChanged: (v) {
+                                setState(() => _mediaFilterId = v);
+                                _load(refresh: true);
+                              },
+                            )
+                          : const SizedBox.shrink(),
+                    ),
+                    if (_mediaOptions.isNotEmpty) const SizedBox(width: 8),
+                    Expanded(
+                      flex: 2,
+                      child: DropdownButtonFormField<String>(
+                        value: _sortBy,
+                        isExpanded: true,
+                        decoration: const InputDecoration(
+                          labelText: 'Sort by',
+                          isDense: true,
+                          prefixIcon: Icon(Icons.sort, size: 18),
+                          contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                        ),
+                        items: const [
+                          DropdownMenuItem(value: 'newest', child: Text('Newest', style: TextStyle(fontSize: 13))),
+                          DropdownMenuItem(value: 'oldest', child: Text('Oldest', style: TextStyle(fontSize: 13))),
+                          DropdownMenuItem(value: 'title_asc', child: Text('Title A-Z', style: TextStyle(fontSize: 13))),
+                          DropdownMenuItem(value: 'title_desc', child: Text('Title Z-A', style: TextStyle(fontSize: 13))),
+                        ],
+                        onChanged: (v) {
+                          if (v != null) {
+                            setState(() => _sortBy = v);
+                            _applySort();
+                          }
+                        },
+                      ),
+                    ),
+                  ],
+                ),
               ],
             ),
           ),

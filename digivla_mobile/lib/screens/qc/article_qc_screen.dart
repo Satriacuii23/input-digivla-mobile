@@ -38,6 +38,8 @@ class _ArticleQcScreenState extends State<ArticleQcScreen> {
   String? _error;
   QcPeriod _period = QcPeriod.todayYesterday;
   int? _mediaFilterId;
+  final Set<int> _selectedIds = {};
+  bool _isDeleting = false;
 
   @override
   void initState() {
@@ -79,6 +81,7 @@ class _ArticleQcScreenState extends State<ArticleQcScreen> {
         _loading = true;
         _error = null;
         _page = 1;
+        _selectedIds.clear();
       });
     }
     try {
@@ -133,12 +136,86 @@ class _ArticleQcScreenState extends State<ArticleQcScreen> {
     }
   }
 
+  void _toggleSelection(int id, bool? value) {
+    setState(() {
+      if (value == true) {
+        _selectedIds.add(id);
+      } else {
+        _selectedIds.remove(id);
+      }
+    });
+  }
+
+  void _toggleAll() {
+    setState(() {
+      if (_selectedIds.length == _items.length) {
+        _selectedIds.clear();
+      } else {
+        _selectedIds.addAll(_items.map((e) => e.articleId));
+      }
+    });
+  }
+
+  Future<void> _deleteSelected() async {
+    if (_selectedIds.isEmpty) return;
+    
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Delete Selected?', style: TextStyle(color: AppColors.navy)),
+        content: Text('Are you sure you want to delete ${_selectedIds.length} articles? This cannot be undone.'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
+          FilledButton(
+            style: FilledButton.styleFrom(backgroundColor: AppColors.error),
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm != true || !mounted) return;
+
+    setState(() => _isDeleting = true);
+    
+    int successCount = 0;
+    for (final id in _selectedIds) {
+      try {
+        await _service.deleteArticle(widget.channel, id);
+        successCount++;
+      } catch (e) {
+        // Continue deleting others even if one fails
+      }
+    }
+
+    if (mounted) {
+      setState(() => _isDeleting = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Deleted $successCount articles')),
+      );
+      _load(refresh: true);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final range = _dateRange;
+    final user = context.watch<AuthProvider>().user;
+    final canDelete = user?.canDeleteArticles ?? false;
     return PageScaffold(
       title: 'QC ${widget.channel.label}',
       subtitle: '${range.start} → ${range.end} · $_total articles',
+      floatingActionButton: _selectedIds.isNotEmpty && canDelete
+          ? FloatingActionButton.extended(
+              onPressed: _isDeleting ? null : _deleteSelected,
+              backgroundColor: AppColors.error,
+              icon: _isDeleting 
+                  ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                  : const Icon(Icons.delete_outline, color: Colors.white),
+              label: Text('Delete ${_selectedIds.length}', style: const TextStyle(color: Colors.white)),
+            )
+          : null,
       body: Column(
         children: [
           Padding(
@@ -171,6 +248,22 @@ class _ArticleQcScreenState extends State<ArticleQcScreen> {
                       setState(() => _mediaFilterId = v);
                       _load(refresh: true);
                     },
+                  ),
+                ],
+                if (_items.isNotEmpty && canDelete) ...[
+                  const SizedBox(height: 10),
+                  Row(
+                    children: [
+                      Checkbox(
+                        value: _selectedIds.length == _items.length && _items.isNotEmpty,
+                        onChanged: (_) => _toggleAll(),
+                        activeColor: AppColors.navy,
+                      ),
+                      const Text('Select All', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.navy)),
+                      const Spacer(),
+                      if (_selectedIds.isNotEmpty)
+                        Text('${_selectedIds.length} selected', style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                    ],
                   ),
                 ],
               ],
@@ -210,6 +303,12 @@ class _ArticleQcScreenState extends State<ArticleQcScreen> {
                                     children: [
                                       Row(
                                         children: [
+                                          if (canDelete)
+                                            Checkbox(
+                                              value: _selectedIds.contains(a.articleId),
+                                              onChanged: (val) => _toggleSelection(a.articleId, val),
+                                              activeColor: AppColors.navy,
+                                            ),
                                           ChannelBadge(label: 'QC ${widget.channel.label}'),
                                           const Spacer(),
                                           TextButton.icon(

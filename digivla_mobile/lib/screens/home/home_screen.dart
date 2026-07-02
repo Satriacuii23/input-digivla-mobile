@@ -89,6 +89,8 @@ class _HomeScreenState extends State<HomeScreen> {
               )
             else if (_stats != null) ...[
               _StatGrid(stats: _stats!, user: user),
+              const SizedBox(height: 20),
+              _TodayActivityCard(stats: _stats!, user: user),
               const SizedBox(height: 28),
               const SectionHeader(title: 'Quick Actions', subtitle: 'Main app shortcuts by role'),
               const SizedBox(height: 12),
@@ -164,54 +166,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       badge: 'ONLINE',
                       onTap: () => context.go('/online'),
                     ),
-                  if (user?.canQcChannel('tv') ?? false)
-                    QuickActionTile(
-                      icon: Icons.fact_check_outlined,
-                      label: 'QC TV',
-                      count: "Today's uploads",
-                      badge: 'QC',
-                      onTap: () => context.push('/qc/tv'),
-                    ),
-                  if (user?.canQcChannel('radio') ?? false)
-                    QuickActionTile(
-                      icon: Icons.fact_check_outlined,
-                      label: 'QC Radio',
-                      count: "Today's uploads",
-                      badge: 'QC',
-                      onTap: () => context.push('/qc/radio'),
-                    ),
-                  if (user?.canQcChannel('online') ?? false)
-                    QuickActionTile(
-                      icon: Icons.fact_check_outlined,
-                      label: 'QC Online',
-                      count: "Today's uploads",
-                      badge: 'QC',
-                      onTap: () => context.push('/qc/online'),
-                    ),
-                  if (user?.canUseTools ?? false) ...[
-                    QuickActionTile(
-                      icon: Icons.travel_explore_outlined,
-                      label: 'Media Reach',
-                      count: 'SimilarWeb crawler',
-                      badge: 'TOOLS',
-                      onTap: () => context.push('/tools/media-reach'),
-                    ),
-                    QuickActionTile(
-                      icon: Icons.build_outlined,
-                      label: 'All Tools',
-                      count: 'Tools & helpers',
-                      badge: 'TOOLS',
-                      onTap: () => context.push('/tools'),
-                    ),
-                  ],
-                  if (user?.canManageUsers ?? false)
-                    QuickActionTile(
-                      icon: Icons.manage_accounts_outlined,
-                      label: 'Users',
-                      count: 'Manage accounts',
-                      badge: 'ADMIN',
-                      onTap: () => context.push('/users'),
-                    ),
+
                 ],
               ),
             ],
@@ -367,6 +322,118 @@ class _StatCard extends StatelessWidget {
               child: Text('+$today today', style: const TextStyle(fontSize: 11, color: AppColors.textMuted)),
             ),
         ],
+      ),
+    );
+  }
+}
+
+class _TodayActivityCard extends StatelessWidget {
+  const _TodayActivityCard({required this.stats, required this.user});
+
+  final DashboardStats stats;
+  final UserModel? user;
+
+  @override
+  Widget build(BuildContext context) {
+    final todayTotal = stats.todayTv + stats.todayRadio + stats.todayOnline;
+    final canUploadTv = user?.canWriteChannel('tv') ?? false;
+    final canUploadRadio = user?.canWriteChannel('radio') ?? false;
+    final canUploadOnline = user?.canWriteChannel('online') ?? false;
+    
+    String? defaultUploadRoute;
+    if (canUploadOnline) defaultUploadRoute = '/online/upload';
+    else if (canUploadTv) defaultUploadRoute = '/tv/upload';
+    else if (canUploadRadio) defaultUploadRoute = '/radio/upload';
+
+    return DigivlaCard(
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: AppColors.navy.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Icon(Icons.show_chart, color: AppColors.navy, size: 24),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      "Today's Activity",
+                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.navy),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      '$todayTotal articles uploaded today',
+                      style: const TextStyle(fontSize: 13, color: AppColors.textSecondary),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              _ActivityMiniStat(label: 'TV', count: stats.todayTv),
+              const SizedBox(width: 12),
+              _ActivityMiniStat(label: 'Radio', count: stats.todayRadio),
+              const SizedBox(width: 12),
+              _ActivityMiniStat(label: 'Online', count: stats.todayOnline),
+            ],
+          ),
+          if (defaultUploadRoute != null) ...[
+            const SizedBox(height: 20),
+            SizedBox(
+              width: double.infinity,
+              child: FilledButton.icon(
+                onPressed: () => context.push(defaultUploadRoute!),
+                style: FilledButton.styleFrom(
+                  backgroundColor: AppColors.navy,
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                ),
+                icon: const Icon(Icons.add_circle_outline, size: 20),
+                label: const Text('Upload Article', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _ActivityMiniStat extends StatelessWidget {
+  const _ActivityMiniStat({required this.label, required this.count});
+
+  final String label;
+  final int count;
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
+        decoration: BoxDecoration(
+          color: AppColors.background,
+          border: Border.all(color: AppColors.border),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Column(
+          children: [
+            Text(label, style: const TextStyle(fontSize: 11, color: AppColors.textMuted, fontWeight: FontWeight.w600)),
+            const SizedBox(height: 4),
+            Text('$count', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: AppColors.navy)),
+          ],
+        ),
       ),
     );
   }
