@@ -69,14 +69,20 @@ class ArticleDateFilterRow extends StatelessWidget {
           final selected = state.preset == p;
           return Padding(
             padding: const EdgeInsets.only(right: 8),
-            child: FilterChip(
-              label: Text(_presetLabel(p), style: TextStyle(fontSize: 12, fontWeight: selected ? FontWeight.w600 : FontWeight.w400)),
+            child: ChoiceChip(
+              label: Text(_presetLabel(p)),
               selected: selected,
               onSelected: (_) => onChanged(p),
-              selectedColor: AppColors.white,
-              checkmarkColor: AppColors.navy,
-              labelStyle: TextStyle(color: selected ? AppColors.navy : AppColors.textSecondary),
-              side: BorderSide(color: selected ? AppColors.navy : AppColors.border),
+              selectedColor: AppColors.navy,
+              backgroundColor: AppColors.white,
+              showCheckmark: false,
+              labelStyle: TextStyle(
+                color: selected ? AppColors.white : AppColors.textSecondary,
+                fontWeight: selected ? FontWeight.bold : FontWeight.w500,
+                fontSize: 12,
+              ),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              side: BorderSide(color: selected ? AppColors.navy : AppColors.border, width: 1),
             ),
           );
         }).toList(),
@@ -123,13 +129,20 @@ class QcPeriodFilterRow extends StatelessWidget {
   }
 
   Widget _chip(String label, bool selected, VoidCallback onTap) {
-    return FilterChip(
-      label: Text(label, style: const TextStyle(fontSize: 11)),
+    return ChoiceChip(
+      label: Text(label),
       selected: selected,
       onSelected: (_) => onTap(),
-      selectedColor: AppColors.white,
-      checkmarkColor: AppColors.navy,
-      side: BorderSide(color: selected ? AppColors.navy : AppColors.border),
+      selectedColor: AppColors.navy,
+      backgroundColor: AppColors.white,
+      showCheckmark: false,
+      labelStyle: TextStyle(
+        color: selected ? AppColors.white : AppColors.textSecondary,
+        fontWeight: selected ? FontWeight.bold : FontWeight.w500,
+        fontSize: 12,
+      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      side: BorderSide(color: selected ? AppColors.navy : AppColors.border, width: 1),
     );
   }
 
@@ -210,13 +223,20 @@ class StatusFilterRow extends StatelessWidget {
   Widget _chip(String label, bool selected, VoidCallback onTap) {
     return Padding(
       padding: const EdgeInsets.only(right: 8),
-      child: FilterChip(
-        label: Text(label, style: const TextStyle(fontSize: 12)),
+      child: ChoiceChip(
+        label: Text(label),
         selected: selected,
         onSelected: (_) => onTap(),
-        selectedColor: AppColors.white,
-        checkmarkColor: AppColors.navy,
-        side: BorderSide(color: selected ? AppColors.navy : AppColors.border),
+        selectedColor: AppColors.navy,
+        backgroundColor: AppColors.white,
+        showCheckmark: false,
+        labelStyle: TextStyle(
+          color: selected ? AppColors.white : AppColors.textSecondary,
+          fontWeight: selected ? FontWeight.bold : FontWeight.w500,
+          fontSize: 12,
+        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        side: BorderSide(color: selected ? AppColors.navy : AppColors.border, width: 1),
       ),
     );
   }

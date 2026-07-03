@@ -15,10 +15,30 @@ abstract final class AppColors {
   static const textPrimary = Color(0xFF1E293B);
   static const textSecondary = Color(0xFF64748B);
   static const textMuted = Color(0xFF94A3B8);
+  static const orange = Color(0xFFF39237);
+  static const orangeDark = Color(0xFFD66800);
   static const error = Color(0xFFB91C1C);
   static const success = Color(0xFF15803D);
   static const white70 = Color(0xB3FFFFFF);
   static const white12 = Color(0x1FFFFFFF);
+
+  static const LinearGradient navyGradient = LinearGradient(
+    colors: [Color(0xFF1E3A5F), Color(0xFF0F2035)],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
+
+  static const LinearGradient orangeGradient = LinearGradient(
+    colors: [Color(0xFFF39237), Color(0xFFD66800)],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
+
+  static const LinearGradient lightPremiumGradient = LinearGradient(
+    colors: [Color(0xFFFFFFFF), Color(0xFFF1F5F9)],
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+  );
 }
 
 ThemeData buildAppTheme() {

@@ -9,24 +9,46 @@ class DigivlaCard extends StatelessWidget {
     required this.child,
     this.onTap,
     this.padding = const EdgeInsets.all(16),
+    this.gradient,
+    this.backgroundColor,
   });
 
   final Widget child;
   final VoidCallback? onTap;
   final EdgeInsets padding;
+  final Gradient? gradient;
+  final Color? backgroundColor;
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: AppColors.white,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: const BorderSide(color: AppColors.border),
+    return Container(
+      decoration: BoxDecoration(
+        color: gradient == null ? (backgroundColor ?? AppColors.white) : null,
+        gradient: gradient,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0x0F0F172A).withValues(alpha: 0.04),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+          BoxShadow(
+            color: const Color(0x0F0F172A).withValues(alpha: 0.02),
+            blurRadius: 4,
+            offset: const Offset(0, 1),
+          ),
+        ],
+        border: gradient != null
+            ? null
+            : Border.all(color: AppColors.border.withValues(alpha: 0.8), width: 1),
       ),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(padding: padding, child: child),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(16),
+          child: Padding(padding: padding, child: child),
+        ),
       ),
     );
   }
@@ -290,6 +312,8 @@ class FormSection extends StatelessWidget {
           Container(
             padding: const EdgeInsets.fromLTRB(16, 14, 16, 12),
             decoration: const BoxDecoration(
+              color: Color(0xFFF8FAFC),
+              borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
               border: Border(bottom: BorderSide(color: AppColors.divider)),
             ),
             child: Column(
@@ -350,16 +374,22 @@ class StatusPill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bgColor = active ? const Color(0xFFDCFCE7) : const Color(0xFFF1F5F9);
+    final textColor = active ? const Color(0xFF15803D) : const Color(0xFF64748B);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
-        color: active ? AppColors.navy.withValues(alpha: 0.08) : AppColors.background,
-        border: Border.all(color: active ? AppColors.navy : AppColors.border),
+        color: bgColor,
         borderRadius: BorderRadius.circular(20),
       ),
       child: Text(
         label,
-        style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: active ? AppColors.navy : AppColors.textMuted),
+        style: TextStyle(
+          fontSize: 10,
+          fontWeight: FontWeight.bold,
+          color: textColor,
+          letterSpacing: 0.2,
+        ),
       ),
     );
   }
@@ -455,16 +485,22 @@ class MetaChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: AppColors.background,
-        borderRadius: BorderRadius.circular(6),
-        border: Border.all(color: AppColors.border),
+        color: const Color(0xFFF1F5F9),
+        borderRadius: BorderRadius.circular(8),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 12, color: AppColors.textMuted),
+          Icon(icon, size: 12, color: AppColors.textSecondary),
           const SizedBox(width: 4),
-          Text(label, style: const TextStyle(fontSize: 11, color: AppColors.textSecondary)),
+          Text(
+            label,
+            style: const TextStyle(
+              fontSize: 10,
+              fontWeight: FontWeight.w600,
+              color: AppColors.textSecondary,
+            ),
+          ),
         ],
       ),
     );

@@ -67,40 +67,43 @@ class _LoginScreenState extends State<LoginScreen> {
     final pad = AppResponsive.pagePadding(context);
 
     return Scaffold(
-      backgroundColor: AppColors.white,
-      resizeToAvoidBottomInset: true,
-      body: SafeArea(
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            return SingleChildScrollView(
-              padding: EdgeInsets.fromLTRB(pad, pad, pad, pad + bottomInset),
-              child: ConstrainedBox(
-                constraints: BoxConstraints(minHeight: constraints.maxHeight - 48),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const SizedBox(height: 12),
-                    _LoginHeader(),
-                    const SizedBox(height: 36),
-                    _LoginFormCard(
-                      formKey: _formKey,
-                      usernameCtrl: _usernameCtrl,
-                      passwordCtrl: _passwordCtrl,
-                      usernameFocus: _usernameFocus,
-                      passwordFocus: _passwordFocus,
-                      obscure: _obscure,
-                      loading: loading,
-                      onToggleObscure: () => setState(() => _obscure = !_obscure),
-                      onSubmit: _submit,
-                    ),
-                    const SizedBox(height: 28),
-                    _LoginFooter(),
-                    const SizedBox(height: 12),
-                  ],
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: AppColors.lightPremiumGradient,
+        ),
+        child: SafeArea(
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              return SingleChildScrollView(
+                padding: EdgeInsets.fromLTRB(pad, pad, pad, pad + bottomInset),
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const SizedBox(height: 12),
+                      _LoginHeader(),
+                      const SizedBox(height: 36),
+                      _LoginFormCard(
+                        formKey: _formKey,
+                        usernameCtrl: _usernameCtrl,
+                        passwordCtrl: _passwordCtrl,
+                        usernameFocus: _usernameFocus,
+                        passwordFocus: _passwordFocus,
+                        obscure: _obscure,
+                        loading: loading,
+                        onToggleObscure: () => setState(() => _obscure = !_obscure),
+                        onSubmit: _submit,
+                      ),
+                      const SizedBox(height: 28),
+                      _LoginFooter(),
+                      const SizedBox(height: 12),
+                    ],
+                  ),
                 ),
-              ),
-            );
-          },
+              );
+            },
+          ),
         ),
       ),
     );
@@ -112,30 +115,30 @@ class _LoginHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        const Center(child: DigivlaLogo()),
+        const Center(child: DigivlaLogo(height: 48)),
         const SizedBox(height: 14),
         const Text(
           'IDS 2.0 · Daily Uploader',
           textAlign: TextAlign.center,
-          style: TextStyle(fontSize: 14, color: AppColors.textSecondary, fontWeight: FontWeight.w500),
+          style: TextStyle(fontSize: 14, color: AppColors.textSecondary, fontWeight: FontWeight.w600, letterSpacing: 0.5),
         ),
         const SizedBox(height: 20),
         Container(
           width: 48,
-          height: 3,
+          height: 4,
           decoration: BoxDecoration(
-            color: const Color(0xFFF39237),
+            gradient: AppColors.orangeGradient,
             borderRadius: BorderRadius.circular(2),
           ),
         ),
         const SizedBox(height: 20),
         const Text(
           'Sign in to your account',
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: AppColors.navy),
+          style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: AppColors.navy, letterSpacing: -0.2),
         ),
         const SizedBox(height: 8),
         const Padding(
-          padding: EdgeInsets.symmetric(horizontal: 12),
+          padding: EdgeInsets.symmetric(horizontal: 24),
           child: Text(
             'Manage TV, Radio, and Online media articles from your mobile device.',
             textAlign: TextAlign.center,
@@ -177,17 +180,22 @@ class _LoginFormCard extends StatelessWidget {
       constraints: const BoxConstraints(maxWidth: 420),
       decoration: BoxDecoration(
         color: AppColors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.border),
+        borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: AppColors.navy.withValues(alpha: 0.04),
-            blurRadius: 32,
-            offset: const Offset(0, 12),
+            color: AppColors.navy.withValues(alpha: 0.08),
+            blurRadius: 40,
+            offset: const Offset(0, 16),
+          ),
+          BoxShadow(
+            color: AppColors.navy.withValues(alpha: 0.02),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
           ),
         ],
+        border: Border.all(color: AppColors.border.withValues(alpha: 0.8)),
       ),
-      padding: const EdgeInsets.fromLTRB(22, 26, 22, 22),
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 30),
       child: Form(
         key: formKey,
         child: Column(
@@ -220,22 +228,34 @@ class _LoginFormCard extends StatelessWidget {
               validator: (v) => (v == null || v.isEmpty) ? 'Password wajib diisi' : null,
             ),
             const SizedBox(height: 26),
-            SizedBox(
-              height: 50,
+            Container(
+              height: 52,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(16),
+                gradient: AppColors.navyGradient,
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.navy.withValues(alpha: 0.25),
+                    blurRadius: 12,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
               child: ElevatedButton(
                 onPressed: loading ? null : onSubmit,
                 style: ElevatedButton.styleFrom(
                   elevation: 0,
-                  backgroundColor: AppColors.navy,
-                  disabledBackgroundColor: AppColors.navy.withValues(alpha: 0.5),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  backgroundColor: Colors.transparent,
+                  foregroundColor: AppColors.white,
+                  shadowColor: Colors.transparent,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                 ),
                 child: loading
                     ? const ButtonLoadingIndicator()
                     : const Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Text('Sign In', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: AppColors.white)),
+                          Text('Sign In', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.white)),
                           SizedBox(width: 8),
                           Icon(Icons.arrow_forward_rounded, size: 20, color: AppColors.white),
                         ],

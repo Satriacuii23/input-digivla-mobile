@@ -121,15 +121,33 @@ class _AddMediaScreenState extends State<AddMediaScreen> {
         subtitle: 'Single · Multi · Bulk',
         body: Column(
           children: [
-            const TabBar(
-              labelColor: AppColors.navy,
-              unselectedLabelColor: AppColors.textMuted,
-              indicatorColor: AppColors.navy,
-              tabs: [
-                Tab(text: 'Single'),
-                Tab(text: 'Multi'),
-                Tab(text: 'Bulk'),
-              ],
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              child: Container(
+                height: 46,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF1F5F9),
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                padding: const EdgeInsets.all(4),
+                child: TabBar(
+                  labelColor: AppColors.white,
+                  unselectedLabelColor: AppColors.textSecondary,
+                  indicatorSize: TabBarIndicatorSize.tab,
+                  dividerColor: Colors.transparent,
+                  indicator: BoxDecoration(
+                    gradient: AppColors.navyGradient,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  labelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                  unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w500, fontSize: 13),
+                  tabs: const [
+                    Tab(text: 'Single'),
+                    Tab(text: 'Multi'),
+                    Tab(text: 'Bulk'),
+                  ],
+                ),
+              ),
             ),
             Expanded(
               child: TabBarView(
