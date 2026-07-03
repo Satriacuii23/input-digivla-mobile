@@ -270,16 +270,15 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
                   scrollDirection: Axis.horizontal,
                   child: Row(
                     children: [
-                      FilterChip(
-                        label: const Text('All roles', style: TextStyle(fontSize: 12)),
+                      DigivlaChoiceChip(
+                        label: 'All roles',
                         selected: _filterRole == null,
                         onSelected: (_) { setState(() => _filterRole = null); _search(); },
                       ),
-                      const SizedBox(width: 8),
                       ..._roles.map((r) => Padding(
-                            padding: const EdgeInsets.only(right: 8),
-                            child: FilterChip(
-                              label: Text(r.label, style: const TextStyle(fontSize: 12)),
+                            padding: const EdgeInsets.only(left: 8),
+                            child: DigivlaChoiceChip(
+                              label: r.label,
                               selected: _filterRole == r.value,
                               onSelected: (_) { setState(() => _filterRole = r.value); _search(); },
                             ),
@@ -288,26 +287,29 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
                   ),
                 ),
                 const SizedBox(height: 8),
-                Row(
-                  children: [
-                    FilterChip(
-                      label: const Text('All status', style: TextStyle(fontSize: 12)),
-                      selected: _filterStatus == null,
-                      onSelected: (_) { setState(() => _filterStatus = null); _search(); },
-                    ),
-                    const SizedBox(width: 8),
-                    FilterChip(
-                      label: const Text('Active', style: TextStyle(fontSize: 12)),
-                      selected: _filterStatus == 'active',
-                      onSelected: (_) { setState(() => _filterStatus = 'active'); _search(); },
-                    ),
-                    const SizedBox(width: 8),
-                    FilterChip(
-                      label: const Text('Inactive', style: TextStyle(fontSize: 12)),
-                      selected: _filterStatus == 'inactive',
-                      onSelected: (_) { setState(() => _filterStatus = 'inactive'); _search(); },
-                    ),
-                  ],
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: [
+                      DigivlaChoiceChip(
+                        label: 'All status',
+                        selected: _filterStatus == null,
+                        onSelected: (_) { setState(() => _filterStatus = null); _search(); },
+                      ),
+                      const SizedBox(width: 8),
+                      DigivlaChoiceChip(
+                        label: 'Active',
+                        selected: _filterStatus == 'active',
+                        onSelected: (_) { setState(() => _filterStatus = 'active'); _search(); },
+                      ),
+                      const SizedBox(width: 8),
+                      DigivlaChoiceChip(
+                        label: 'Inactive',
+                        selected: _filterStatus == 'inactive',
+                        onSelected: (_) { setState(() => _filterStatus = 'inactive'); _search(); },
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),

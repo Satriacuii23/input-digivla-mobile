@@ -237,33 +237,15 @@ class _ArticleListScreenState extends State<ArticleListScreen> {
                             )
                           : const SizedBox.shrink(),
                     ),
-                    if (_mediaOptions.isNotEmpty) const SizedBox(width: 8),
-                    Expanded(
-                      flex: 2,
-                      child: DropdownButtonFormField<String>(
-                        value: _sortBy,
-                        isExpanded: true,
-                        decoration: const InputDecoration(
-                          labelText: 'Sort by',
-                          isDense: true,
-                          prefixIcon: Icon(Icons.sort, size: 18),
-                          contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-                        ),
-                        items: const [
-                          DropdownMenuItem(value: 'newest', child: Text('Newest', style: TextStyle(fontSize: 13))),
-                          DropdownMenuItem(value: 'oldest', child: Text('Oldest', style: TextStyle(fontSize: 13))),
-                          DropdownMenuItem(value: 'title_asc', child: Text('Title A-Z', style: TextStyle(fontSize: 13))),
-                          DropdownMenuItem(value: 'title_desc', child: Text('Title Z-A', style: TextStyle(fontSize: 13))),
-                        ],
-                        onChanged: (v) {
-                          if (v != null) {
-                            setState(() => _sortBy = v);
-                            _applySort();
-                          }
-                        },
-                      ),
-                    ),
                   ],
+                ),
+                const SizedBox(height: 10),
+                SortFilterRow(
+                  selected: _sortBy,
+                  onChanged: (v) {
+                    setState(() => _sortBy = v);
+                    _applySort();
+                  },
                 ),
               ],
             ),

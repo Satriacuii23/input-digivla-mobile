@@ -183,17 +183,17 @@ class _LoginFormCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: AppColors.navy.withValues(alpha: 0.08),
+            color: const Color(0x0A000000), // 4% black
             blurRadius: 40,
             offset: const Offset(0, 16),
           ),
           BoxShadow(
-            color: AppColors.navy.withValues(alpha: 0.02),
+            color: const Color(0x05000000), // 2% black
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
         ],
-        border: Border.all(color: AppColors.border.withValues(alpha: 0.8)),
+        // border: none,
       ),
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 30),
       child: Form(

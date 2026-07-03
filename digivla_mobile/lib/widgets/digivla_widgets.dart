@@ -28,19 +28,17 @@ class DigivlaCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: const Color(0x0F0F172A).withValues(alpha: 0.04),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
+            color: const Color(0x0A000000), // very soft black 4%
+            blurRadius: 20,
+            offset: const Offset(0, 10),
           ),
           BoxShadow(
-            color: const Color(0x0F0F172A).withValues(alpha: 0.02),
+            color: const Color(0x05000000), // 2% for closer edge
             blurRadius: 4,
-            offset: const Offset(0, 1),
+            offset: const Offset(0, 2),
           ),
         ],
-        border: gradient != null
-            ? null
-            : Border.all(color: AppColors.border.withValues(alpha: 0.8), width: 1),
+        // border: null, // NO BORDER for fresh look!
       ),
       child: Material(
         color: Colors.transparent,
@@ -310,16 +308,15 @@ class FormSection extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Container(
-            padding: const EdgeInsets.fromLTRB(16, 14, 16, 12),
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 0), // Removed bottom border, adjusted padding
             decoration: const BoxDecoration(
-              color: Color(0xFFF8FAFC),
+              color: Colors.transparent, // Clean, seamless header
               borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-              border: Border(bottom: BorderSide(color: AppColors.divider)),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.navy)),
+                Text(title, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: AppColors.navy)),
                 if (subtitle != null)
                   Padding(
                     padding: const EdgeInsets.only(top: 4),
@@ -612,6 +609,43 @@ class NavMenuTile extends StatelessWidget {
           const Icon(Icons.chevron_right, color: AppColors.textMuted, size: 22),
         ],
       ),
+    );
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  DigivlaChoiceChip — Unified premium chip for filters
+// ═══════════════════════════════════════════════════════════════
+
+class DigivlaChoiceChip extends StatelessWidget {
+  const DigivlaChoiceChip({
+    super.key,
+    required this.label,
+    required this.selected,
+    required this.onSelected,
+  });
+
+  final String label;
+  final bool selected;
+  final ValueChanged<bool>? onSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    return ChoiceChip(
+      label: Text(label),
+      selected: selected,
+      onSelected: onSelected,
+      selectedColor: AppColors.navy,
+      backgroundColor: AppColors.background,
+      showCheckmark: false,
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      labelStyle: TextStyle(
+        color: selected ? AppColors.white : AppColors.textSecondary,
+        fontWeight: selected ? FontWeight.bold : FontWeight.w600,
+        fontSize: 12,
+      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      side: BorderSide.none,
     );
   }
 }

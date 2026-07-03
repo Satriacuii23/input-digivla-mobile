@@ -440,12 +440,18 @@ class DigivlaBottomNavBar extends StatelessWidget {
     return Container(
       decoration: const BoxDecoration(
         color: AppColors.white,
-        border: Border(top: BorderSide(color: AppColors.border)),
+        boxShadow: [
+          BoxShadow(
+            color: Color(0x0A000000),
+            blurRadius: 20,
+            offset: Offset(0, -5),
+          ),
+        ],
       ),
       child: SafeArea(
         top: false,
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
           child: Row(
             children: [
               for (var i = 0; i < tabs.length; i++) ...[
@@ -479,29 +485,32 @@ class _NavItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: selected ? AppColors.navy.withValues(alpha: 0.08) : Colors.transparent,
-      borderRadius: BorderRadius.circular(12),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(selected ? tab.activeIcon : tab.icon, size: 22, color: selected ? AppColors.navy : AppColors.textMuted),
-              const SizedBox(height: 4),
-              Text(
-                tab.label,
-                style: TextStyle(
-                  fontSize: 11,
-                  fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
-                  color: selected ? AppColors.navy : AppColors.textMuted,
-                ),
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(16),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+              decoration: BoxDecoration(
+                color: selected ? AppColors.navy.withValues(alpha: 0.1) : Colors.transparent,
+                borderRadius: BorderRadius.circular(16),
               ),
-            ],
-          ),
+              child: Icon(selected ? tab.activeIcon : tab.icon, size: 24, color: selected ? AppColors.navy : AppColors.textMuted),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              tab.label,
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: selected ? FontWeight.bold : FontWeight.w500,
+                color: selected ? AppColors.navy : AppColors.textMuted,
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -538,29 +547,7 @@ class MainShell extends StatelessWidget {
   }
 }
 
-/// Beranda wrapper with same bottom nav (no tab selected).
-class HomeShell extends StatelessWidget {
-  const HomeShell({super.key, required this.child});
-
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    final auth = context.watch<AuthProvider>();
-    final tabs = DigivlaNav.tabsForRole(auth.user?.role);
-
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      drawer: const DigivlaDrawer(),
-      body: SafeArea(bottom: false, child: child),
-      bottomNavigationBar: DigivlaBottomNavBar(
-        tabs: tabs,
-        selectedIndex: -1,
-        onDestinationSelected: (i) => context.go(tabs[i].route),
-      ),
-    );
-  }
-}
+// Removed HomeShell
 
 // ═══════════════════════════════════════════════════════════════
 //  Page scaffolds — with drawer hamburger menu

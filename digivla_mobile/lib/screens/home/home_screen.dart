@@ -8,7 +8,6 @@ import '../../core/auth/auth_provider.dart';
 import '../../models/user.dart';
 import '../../services/dashboard_service.dart';
 import '../../widgets/account_menu.dart';
-import '../../widgets/app_scaffold.dart';
 import '../../widgets/digivla_logo.dart';
 import '../../widgets/digivla_widgets.dart';
 
@@ -56,14 +55,12 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     final user = context.watch<AuthProvider>().user;
     final pad = AppResponsive.pagePadding(context);
-    final gridCols = AppResponsive.quickActionColumns(context);
 
-    return HomeShell(
-      child: RefreshIndicator(
-        onRefresh: _loadStats,
-        color: AppColors.navy,
-        child: ListView(
-          padding: EdgeInsets.fromLTRB(pad, pad, pad, 24),
+    return RefreshIndicator(
+      onRefresh: _loadStats,
+      color: AppColors.navy,
+      child: ListView(
+        padding: EdgeInsets.fromLTRB(pad, pad, pad, 24),
           children: [
             _HomeTopBar(user: user, onRefresh: _loadStats),
             const SizedBox(height: 24),
@@ -99,7 +96,6 @@ class _HomeScreenState extends State<HomeScreen> {
             ],
           ],
         ),
-      ),
     );
   }
 }

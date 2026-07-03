@@ -168,10 +168,10 @@ class UserRbac {
     final role = normalizeRole(rawRole);
     if (role == null) return const [];
     if (role == AppRole.superadmin || role == AppRole.admin) {
-      return const ['/media', '/tv', '/radio', '/online'];
+      return const ['/home', '/media', '/tv', '/radio', '/online'];
     }
-    if (role == AppRole.staffTvRadio) return const ['/media', '/tv', '/radio'];
-    if (role == AppRole.staffOnline) return const ['/media', '/online'];
-    return const [];
+    if (role == AppRole.staffTvRadio) return const ['/home', '/media', '/tv', '/radio'];
+    if (role == AppRole.staffOnline) return const ['/home', '/media', '/online'];
+    return const ['/home'];
   }
 }

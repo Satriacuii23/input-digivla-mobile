@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 
 import '../config/theme.dart';
 import '../models/media.dart';
+import 'digivla_widgets.dart';
 
 /// Preset filters for article publication date (datee).
 enum ArticleDatePreset {
@@ -223,21 +224,49 @@ class StatusFilterRow extends StatelessWidget {
   Widget _chip(String label, bool selected, VoidCallback onTap) {
     return Padding(
       padding: const EdgeInsets.only(right: 8),
-      child: ChoiceChip(
-        label: Text(label),
+      child: DigivlaChoiceChip(
+        label: label,
         selected: selected,
         onSelected: (_) => onTap(),
-        selectedColor: AppColors.navy,
-        backgroundColor: AppColors.white,
-        showCheckmark: false,
-        labelStyle: TextStyle(
-          color: selected ? AppColors.white : AppColors.textSecondary,
-          fontWeight: selected ? FontWeight.bold : FontWeight.w500,
-          fontSize: 12,
-        ),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        side: BorderSide(color: selected ? AppColors.navy : AppColors.border, width: 1),
       ),
     );
   }
 }
+
+class SortFilterRow extends StatelessWidget {
+  const SortFilterRow({
+    super.key,
+    required this.selected,
+    required this.onChanged,
+  });
+
+  final String selected;
+  final ValueChanged<String> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        children: [
+          _chip('Newest', selected == 'newest', () => onChanged('newest')),
+          _chip('Oldest', selected == 'oldest', () => onChanged('oldest')),
+          _chip('Title A-Z', selected == 'title_asc', () => onChanged('title_asc')),
+          _chip('Title Z-A', selected == 'title_desc', () => onChanged('title_desc')),
+        ],
+      ),
+    );
+  }
+
+  Widget _chip(String label, bool selected, VoidCallback onTap) {
+    return Padding(
+      padding: const EdgeInsets.only(right: 8),
+      child: DigivlaChoiceChip(
+        label: label,
+        selected: selected,
+        onSelected: (_) => onTap(),
+      ),
+    );
+  }
+}
+

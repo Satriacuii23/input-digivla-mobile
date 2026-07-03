@@ -62,40 +62,41 @@ ThemeData buildAppTheme() {
       backgroundColor: AppColors.white,
       foregroundColor: navy,
       elevation: 0,
-      scrolledUnderElevation: 1,
-      shadowColor: Color(0x0D000000),
+      scrolledUnderElevation: 0,
+      shadowColor: Colors.transparent,
       centerTitle: false,
       titleTextStyle: TextStyle(
         color: navy,
         fontSize: 18,
-        fontWeight: FontWeight.w600,
+        fontWeight: FontWeight.bold, // Bolder title
         letterSpacing: -0.2,
       ),
       iconTheme: IconThemeData(color: navy),
     ),
     cardTheme: CardThemeData(
       color: AppColors.white,
-      elevation: 0,
+      elevation: 4,
+      shadowColor: const Color(0x0A000000), // Very soft 4% black shadow
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: const BorderSide(color: AppColors.border),
+        borderRadius: BorderRadius.circular(16),
       ),
       margin: EdgeInsets.zero,
+      surfaceTintColor: Colors.transparent, // Prevents Material 3 tinting
     ),
     inputDecorationTheme: InputDecorationTheme(
       filled: true,
-      fillColor: AppColors.white,
+      fillColor: AppColors.background, // Light gray for inputs
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(10),
-        borderSide: const BorderSide(color: AppColors.border),
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide.none, // Borderless by default
       ),
       enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(10),
-        borderSide: const BorderSide(color: AppColors.border),
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide.none,
       ),
       focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(12),
         borderSide: const BorderSide(color: navy, width: 1.5),
       ),
       labelStyle: const TextStyle(color: AppColors.textSecondary, fontSize: 14),
@@ -129,13 +130,33 @@ ThemeData buildAppTheme() {
       iconColor: navy,
       textColor: AppColors.textPrimary,
     ),
+    navigationBarTheme: NavigationBarThemeData(
+      backgroundColor: AppColors.white,
+      indicatorColor: AppColors.navy.withValues(alpha: 0.1),
+      labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
+      elevation: 20,
+      shadowColor: const Color(0x1A000000), // 10% black
+      surfaceTintColor: Colors.transparent,
+      iconTheme: WidgetStateProperty.resolveWith((states) {
+        if (states.contains(WidgetState.selected)) {
+          return const IconThemeData(color: navy, size: 26);
+        }
+        return const IconThemeData(color: AppColors.textMuted, size: 24);
+      }),
+      labelTextStyle: WidgetStateProperty.resolveWith((states) {
+        if (states.contains(WidgetState.selected)) {
+          return const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: navy);
+        }
+        return const TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: AppColors.textMuted);
+      }),
+    ),
     bottomNavigationBarTheme: const BottomNavigationBarThemeData(
       backgroundColor: AppColors.white,
       selectedItemColor: navy,
       unselectedItemColor: AppColors.textMuted,
       type: BottomNavigationBarType.fixed,
-      elevation: 0,
-      selectedLabelStyle: TextStyle(fontSize: 11, fontWeight: FontWeight.w600),
+      elevation: 20,
+      selectedLabelStyle: TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
       unselectedLabelStyle: TextStyle(fontSize: 11),
     ),
     snackBarTheme: SnackBarThemeData(

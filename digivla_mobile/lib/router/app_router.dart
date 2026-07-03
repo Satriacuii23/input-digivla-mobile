@@ -44,7 +44,6 @@ GoRouter createAppRouter(AuthProvider auth) {
     },
     routes: [
       GoRoute(path: '/login', builder: (_, __) => const LoginScreen()),
-      GoRoute(path: '/home', builder: (_, __) => const HomeScreen()),
       GoRoute(path: '/tools', builder: (_, __) => const ToolsScreen()),
       GoRoute(path: '/tools/media-reach', builder: (_, __) => const MediaReachScreen()),
       GoRoute(path: '/tools/backtrack', builder: (_, __) => const BacktrackScreen()),
@@ -59,6 +58,9 @@ GoRouter createAppRouter(AuthProvider auth) {
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) => MainShell(navigationShell: navigationShell),
         branches: [
+          StatefulShellBranch(routes: [
+            GoRoute(path: '/home', builder: (_, __) => const HomeScreen()),
+          ]),
           StatefulShellBranch(routes: [
             GoRoute(path: '/media', builder: (_, __) => const MediaListScreen()),
           ]),
